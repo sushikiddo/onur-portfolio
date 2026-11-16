@@ -1,0 +1,3 @@
+/admin https://onur-portfolio.onurcan147258.workers.dev/admin/ 302
+/admin/ https://onur-portfolio.onurcan147258.workers.dev/admin/ 302
+/admin/* https://onur-portfolio.onurcan147258.workers.dev/admin/:splat 302
