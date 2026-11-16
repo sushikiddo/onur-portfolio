@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="650" viewBox="0 0 1000 650" role="img" aria-labelledby="title desc">
+  <title id="title">Digital illustration study</title><desc id="desc">An abstract landscape exploring layers, shape and colour.</desc>
+  <defs><linearGradient id="bg" x2="0" y2="1"><stop stop-color="#182b3b"/><stop offset="1" stop-color="#101522"/></linearGradient><linearGradient id="sun" x2="1"><stop stop-color="#f6bd78"/><stop offset="1" stop-color="#ec8493"/></linearGradient><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M50 0H0V50" fill="none" stroke="#fff" stroke-opacity=".055"/></pattern></defs>
+  <rect width="1000" height="650" fill="url(#bg)"/><rect width="1000" height="650" fill="url(#grid)"/><circle cx="710" cy="230" r="92" fill="url(#sun)"/>
+  <path d="M0 440 210 250l158 155 196-218 205 226 131-130 100 95v272H0Z" fill="#344b61"/><path d="m0 490 204-128 178 115 207-178 190 170 130-92 91 72v201H0Z" fill="#547e87"/><path d="m0 545 225-78 188 86 227-102 176 92 184-75v182H0Z" fill="#1e3547"/>
+  <path d="M110 570H890" stroke="#dbe7f2" stroke-opacity=".25"/><g fill="#dbe7f2" font-family="Arial,sans-serif"><text x="112" y="606" font-size="17" letter-spacing="5">SHAPE / LAYERS / COLOUR</text><text x="810" y="606" font-size="15" letter-spacing="3" fill="#a0abc1">STUDY 03</text></g>
+</svg>

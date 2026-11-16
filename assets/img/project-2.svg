@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="650" viewBox="0 0 1000 650" role="img" aria-labelledby="title desc">
+  <title id="title">Kinetic typography study</title><desc id="desc">Abstract study of letterforms, rhythm and motion.</desc>
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#111827"/><stop offset="1" stop-color="#252044"/></linearGradient><linearGradient id="glow"><stop stop-color="#9eacff"/><stop offset="1" stop-color="#68dece"/></linearGradient><pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse"><path d="M44 0H0V44" fill="none" stroke="#fff" stroke-opacity=".06"/></pattern></defs>
+  <rect width="1000" height="650" fill="url(#bg)"/><rect width="1000" height="650" fill="url(#grid)"/><circle cx="790" cy="160" r="205" fill="#9eacff" opacity=".08"/>
+  <path d="M110 480H890" stroke="#fff" stroke-opacity=".22"/><path d="M110 490H540" stroke="url(#glow)" stroke-width="4"/>
+  <g fill="none" stroke="url(#glow)" stroke-width="14" stroke-linecap="square"><path d="M180 170V410M180 170H320M180 285H300M180 410H320"/><path d="M400 170V410M400 170H510M400 285H500M400 410H510"/><path d="M590 170V410M590 170H700M590 285H690M590 410H700"/></g>
+  <g fill="#f1f2ff" font-family="Arial,sans-serif"><text x="112" y="545" font-size="17" letter-spacing="5">TYPE / RHYTHM / MOTION</text><text x="810" y="545" font-size="15" letter-spacing="3" fill="#a0abc1">STUDY 02</text></g>
+</svg>

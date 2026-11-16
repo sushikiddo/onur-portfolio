@@ -1,0 +1,23 @@
+HAZIR ŞABLON: Phantom — HTML5 UP
+Resmî adres: https://html5up.net/phantom
+Geliştirici: HTML5 UP / AJ (ajlkn)
+Lisans: Creative Commons Attribution 3.0 Unported (CC BY 3.0)
+Lisans metni: LICENSE-Phantom.txt
+
+GERÇEK ENTEGRASYON
+Orijinal Phantom assets/css/main.css, logo.svg, örnek arka plan görseli ve web fontları projeye dahil edilmiştir.
+Phantom tiles/style1/image/content bileşenleri projelerin ve galeri kartlarının HTML yapısında kullanılmıştır.
+Phantom responsive bileşenleri assets/css/style.css ile kişiselleştirilmiş, Türkçe/İngilizce çok sayfalı yapı ve açık/koyu tema eklenmiştir.
+Phantom demo fotoğrafı pic01.jpg yalnızca dekoratif hero arka planında kullanılmıştır; kullanıcı fotoğrafı değildir.
+Proje ve galeri SVG'leri özgün yer tutucu görsellerdir.
+
+YAZI TİPLERİ (assets/fonts, yerel olarak barındırılır)
+Bricolage Grotesque — Mathieu Triay · SIL Open Font License 1.1
+Manrope — Mikhail Sharanda · SIL Open Font License 1.1
+Instrument Serif — Instrument · SIL Open Font License 1.1
+JetBrains Mono — JetBrains · SIL Open Font License 1.1
+Dosyalar Fontsource (fontsource.org) paketlerinden alınmıştır: https://fontsource.org
+
+EKLENENLER
+404.html: Cloudflare Pages'in bulunamayan adresler için otomatik gösterdiği özel hata sayfası.
+images/og-card.jpg: Bağlantı paylaşıldığında (WhatsApp, LinkedIn vb.) görünen önizleme görseli; site tasarımından üretilmiştir.

@@ -1,0 +1,1 @@
+Siteye özgü HTML/CSS/JS dosyaları bu çalışma için hazırlanmıştır. HTML5 UP Phantom dosyaları dahil değildir. Harici şablon kullanılırsa kendi lisansı ve atıfları korunmalıdır. SVG görseller özgün yer tutuculardır.
