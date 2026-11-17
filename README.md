@@ -2,7 +2,7 @@
 
 Canlı site: https://onurcanorhan.pages.dev/
 
-Türkçe ve İngilizce çok sayfalı statik portfolyo. Kömür proje sayfası, GitHub kaynakları ve Windows 1.1.0 indirme bağlantıları içerir.
+Türkçe ve İngilizce çok sayfalı statik portfolyo. Kömür proje sayfası, GitHub kaynakları ve Windows 2.1 indirme bağlantıları içerir.
 
 ## Yerel önizleme
 
