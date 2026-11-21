@@ -1,2 +1,12 @@
-﻿/* Navigation stays native; the curtain is purely decorative and never intercepts input. */
-html{scroll-behavior:smooth}.page-curtain{position:fixed;inset:0;z-index:9998;pointer-events:none;transform:translateY(-105%);background:linear-gradient(115deg,#080f22 0%,#101f43 55%,#294caa 100%);will-change:transform}.page-curtain::after{content:"";position:absolute;inset:auto 0 0;height:3px;background:linear-gradient(90deg,transparent,#84b1ff,#54e0e2,transparent);box-shadow:0 0 28px #719cff}.page-curtain.curtain-enter{animation:curtain-reveal .55s cubic-bezier(.76,0,.24,1) both}.page-curtain.curtain-exit{animation:curtain-cover .34s cubic-bezier(.76,0,.24,1) both}@keyframes curtain-cover{from{transform:translateY(105%)}to{transform:translateY(0)}}@keyframes curtain-reveal{from{transform:translateY(0)}to{transform:translateY(-105%)}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.page-curtain{display:none}}
+﻿/* Curtain is decorative only and never intercepts input. */
+html{scroll-behavior:smooth}
+.hero-line{display:inline-block}
+.page-curtain{position:fixed;inset:0;z-index:9998;pointer-events:none;transform:translateY(-105%);background:#EADFCB;will-change:transform}
+.page-curtain::after{content:"";position:absolute;inset:auto 0 0;height:2px;background:#B4532A}
+html[data-theme="dark"] .page-curtain{background:#27221D}
+html[data-theme="dark"] .page-curtain::after{background:#D9774A}
+.page-curtain.curtain-enter{animation:curtain-reveal .5s cubic-bezier(.76,0,.24,1) both}
+.page-curtain.curtain-exit{animation:curtain-cover .3s cubic-bezier(.76,0,.24,1) both}
+@keyframes curtain-cover{from{transform:translateY(105%)}to{transform:translateY(0)}}
+@keyframes curtain-reveal{from{transform:translateY(0)}to{transform:translateY(-105%)}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.page-curtain{display:none}}
