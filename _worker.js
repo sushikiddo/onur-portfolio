@@ -1233,40 +1233,15 @@ var MIME_EXTS = { "image/svg+xml": "svg", "image/png": "png", "image/jpeg": "jpg
 async function exportZip(_request, env) {
   try {
     const { value } = await readState(env);
-    const files = /* @__PURE__ */ Object.create(null);
+    const pages = Object.create(null);
     for (const [path, source] of Object.entries(value.pages)) {
-      files[path] = new TextEncoder().encode(source.replace(/<a\b(?=[^>]*\bclass="adminlink")[^>]*>[\s\S]*?<\/a>\s*(?:·|Â·)?\s*/gi, ""));
+      pages[path] = source.replace(/<a(?=[^>]*class="adminlink")[^>]*>[\s\S]*?<\/a>\s*(?:·|Â·)?\s*/gi, "");
     }
     const paths = Array.isArray(value.assetFiles) ? value.assetFiles : DEFAULT_ASSETS;
-    for (const path of paths) {
-      if (typeof path !== "string" || path.startsWith("/") || path.includes("..") || path.startsWith("admin/")) continue;
-      if (Object.hasOwn(value.pages, path)) continue;
-      const bytes = await staticRead(env, `/${path}`);
-      if (bytes) files[path] = bytes;
-    }
+    const files = paths.filter((path) => typeof path === "string" && !path.startsWith("/") && !path.includes("..") && !path.startsWith("admin/") && !Object.hasOwn(pages, path));
     const uploads = await dbFor(env).prepare("SELECT id, mime FROM uploads").all();
-    for (const item of uploads.results || []) {
-      const ext = MIME_EXTS[item.mime] || "bin";
-      const path = `media/${item.id}.${ext}`;
-      const result = await dbFor(env).prepare("SELECT data FROM upload_chunks WHERE upload_id = ? ORDER BY part").bind(item.id).all();
-      const chunks = result.results || [];
-      const normalized = chunks.map((chunk) => asBytes(chunk.data));
-      const bytes = new Uint8Array(normalized.reduce((n, chunk) => n + chunk.byteLength, 0));
-      let offset = 0;
-      for (const data of normalized) {
-        bytes.set(data, offset);
-        offset += data.byteLength;
-      }
-      files[path] = bytes;
-    }
-    const archive = zipSync(files, { level: 0 });
-    return response(archive, 200, {
-      "content-type": "application/zip",
-      "content-disposition": 'attachment; filename="portfolio-site.zip"',
-      "content-length": String(archive.byteLength),
-      "cache-control": "no-store",
-      "x-content-type-options": "nosniff"
-    });
+    const media = (uploads.results || []).map((item) => `media/${item.id}.${MIME_EXTS[item.mime] || "bin"}`);
+    return json3({ pages, files, media });
   } catch (err2) {
     return fail(err2);
   }
