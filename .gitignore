@@ -2,3 +2,4 @@
 .wrangler/
 *-WEB.zip
 *-WEB.PDF
+.deploy/

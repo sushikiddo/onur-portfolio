@@ -5,7 +5,7 @@
   const asset = rel => new URL(rel, self.src).href;
   const motionStyles = document.createElement('link');
   motionStyles.rel = 'stylesheet';
-  motionStyles.href = asset('../css/motion.css');
+  motionStyles.href = asset('../css/motion.css?v=20261122');
   document.head.append(motionStyles);
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const main = document.querySelector('main');
@@ -20,13 +20,7 @@
   const SPLIT_SEL = '.pagehead h1,.pagehead .lead,.section-heading h2,.section-heading p,.home-intro .lead,.hero-copy h1,.hero-tagline,.bio-copy,.footer-signature,.notes-section blockquote p';
   if (!reduced.matches && 'IntersectionObserver' in window) root.classList.add('split-pending');
 
-  // Cream is the default look: only when the visitor never chose a theme.
-  try {
-    if (localStorage.getItem('portfolio-theme') === null && root.dataset.theme !== 'light') {
-      root.dataset.theme = 'light';
-      document.querySelectorAll('[data-theme-toggle]').forEach(b => b.setAttribute('aria-pressed', 'false'));
-    }
-  } catch { /* storage blocked: keep whatever site.js chose */ }
+  // Theme (dark default, light on request) is set by the inline head script and site.js.
 
   // ---- Shared state + the ONE rAF loop (Lenis, WebGL layer) ---------------------------------------------
   const pf = window.__pf = {lenis: null, scroll: scrollY, progress: 0, tasks: [], add(fn) { this.tasks.push(fn); }};
@@ -80,25 +74,7 @@
     });
   }
 
-  // ---- WebGL layer: dust + media planes, one fixed canvas on every page --------------------------------------
-  function startScene() {
-    const conn = navigator.connection;
-    if (!wide() || (conn && conn.saveData)) return;
-    let canvas = document.getElementById('heroSculpture'); // home ships one inside the hero: move it to <body>
-    const home = canvas && canvas.parentNode;
-    if (canvas) { canvas.removeAttribute('width'); canvas.removeAttribute('height'); }
-    else canvas = document.createElement('canvas');
-    canvas.classList.add('gl-layer');
-    canvas.setAttribute('aria-hidden', 'true');
-    body.prepend(canvas);
-    root.classList.add('gl-media');
-    const fail = () => {
-      root.classList.remove('gl-media');
-      document.querySelectorAll('img.gl-on').forEach(i => i.classList.remove('gl-on'));
-      if (home && home.isConnected) { canvas.classList.remove('gl-layer'); home.append(canvas); } else canvas.remove();
-    };
-    import(asset('scene.js')).then(m => m.start(canvas, pf)).then(ok => { if (!ok) fail(); }).catch(fail);
-  }
+  // The heavy WebGL dust layer was dropped: the ambient glow is pure CSS (body::before in style.css).
 
   // ---- Preloader: home, first view per session ---------------------------------------------------------------
   function preloader() {
@@ -113,24 +89,24 @@
         el.className = 'preloader';
         el.setAttribute('aria-hidden', 'true');
         el.innerHTML = '<span class="preloader-label">' + (isEn ? 'LOADING' : 'YÜKLENİYOR') + '</span>' +
-          '<span class="preloader-mark"><svg viewBox="0 0 56 56" width="56" height="56" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="28" cy="28" r="20"/></svg></span>' +
+          '<span class="preloader-mark"><i class="glow-ring"></i></span>' +
           '<span class="preloader-count">0</span>';
         body.append(el);
         const count = el.querySelector('.preloader-count');
         const start = performance.now();
         let loaded = document.readyState === 'complete';
         if (!loaded) addEventListener('load', () => { loaded = true; }, {once: true});
-        const MIN = 1100, MAX = 2500;
+        const MIN = 0, MAX = 1200, RAMP = 300; // no forced minimum wait: lift as soon as the page has loaded
         const tick = now => {
           try {
             const t = now - start;
             const finish = (t >= MIN && loaded) || t >= MAX;
-            const p = Math.min(1, t / MIN);
+            const p = Math.min(1, t / RAMP);
             count.textContent = finish ? 100 : Math.min(99, Math.round((1 - Math.pow(1 - p, 3)) * 100));
             if (!finish) return requestAnimationFrame(tick);
             el.classList.add('is-leaving');
-            setTimeout(done, 720);
-            setTimeout(resolve, 350); // text rises as the sheet lifts
+            setTimeout(done, 580);
+            setTimeout(resolve, 250); // text rises as the sheet lifts
           } catch { done(); }
         };
         requestAnimationFrame(tick);
@@ -217,6 +193,7 @@
     el.classList.add('split-ready');
   }
 
+  const onScreen = el => { const r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight * .98; };
   function runSplit() {
     if (reduced.matches || !('IntersectionObserver' in window)) { root.classList.remove('split-pending'); return; }
     const process = () => {
@@ -225,7 +202,11 @@
         const was = splitState.get(el);
         try { splitLines(el); } catch (e) { console.warn('[pf] split', e); return; }
         if (!splitIO) return;
-        if (was && was.revealed) el.classList.add('is-in'); else splitIO.observe(el);
+        if (was && was.revealed) el.classList.add('is-in');
+        else if (onScreen(el)) { // first screen: reveal at once, no observer wait
+          const st = splitState.get(el); if (st) st.revealed = true;
+          setTimeout(() => el.classList.add('is-in'), 30);
+        } else splitIO.observe(el);
       });
       root.classList.remove('split-pending');
     };
@@ -235,13 +216,13 @@
         splitIO.unobserve(e.target);
         const st = splitState.get(e.target);
         if (st) st.revealed = true;
-        setTimeout(() => e.target.classList.add('is-in'), e.target.matches('.pagehead h1,.hero-copy h1') ? 120 : 0);
+        setTimeout(() => e.target.classList.add('is-in'), 0);
       }), {threshold: [0, .2, .5]});
       process();
       // Safety net: never leave on-screen text hidden.
-      setTimeout(() => document.querySelectorAll('.split-ready:not(.is-in)').forEach(el => {
-        if (el.getBoundingClientRect().top < innerHeight) el.classList.add('is-in');
-      }), 6000);
+      const sweep = () => document.querySelectorAll('.split-ready:not(.is-in)').forEach(el => { if (onScreen(el)) el.classList.add('is-in'); });
+      setTimeout(sweep, 300); setTimeout(sweep, 1500);
+      document.addEventListener('visibilitychange', sweep);
       // Database-driven text can arrive late and wipe our lines: split again what lost them.
       let timer = 0;
       new MutationObserver(() => { clearTimeout(timer); timer = setTimeout(process, 160); })
@@ -249,11 +230,11 @@
     };
     // Split once fonts are in (line breaks depend on them); reveal once the preloader sheet is lifting.
     const fonts = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
-    Promise.race([fonts, new Promise(r => setTimeout(r, 1800))])
+    Promise.race([fonts, new Promise(r => setTimeout(r, 300))])
       .then(() => preloaded)
       .then(openGate)
       .catch(() => root.classList.remove('split-pending'));
-    setTimeout(() => root.classList.remove('split-pending'), 5200);
+    setTimeout(() => root.classList.remove('split-pending'), 1500);
     // Re-split on resize (debounced), only for blocks that have not been revealed yet.
     let rt = 0, lastW = innerWidth;
     addEventListener('resize', () => {
@@ -275,7 +256,7 @@
   });
 
   // The scroll cue and status pill are left out on purpose: the client found them template-like.
-  [smoothScroll, startScene, runSplit].forEach(fn => { try { fn(); } catch (e) { console.warn('[pf]', fn.name, e); } });
+  [smoothScroll, runSplit].forEach(fn => { try { fn(); } catch (e) { console.warn('[pf]', fn.name, e); } });
 
   // ---- Page curtain: decorative sheet, never intercepts input -------------------------------------------------
   const curtain = document.createElement('div');

@@ -1,0 +1,116 @@
+/* @import url('./blackFriday.styl') */
+@import url('./fonts.styl')
+@import url('./tweakpane.styl')
+@import url('./general.styl')
+@import url('./modals.styl')
+@import url('./menu.styl')
+@import url('./tabs.styl')
+@import url('./achievements.styl')
+@import url('./options.styl')
+@import url('./circuit.styl')
+@import url('./controls.styl')
+@import url('./circuit-end.styl')
+@import url('./whispers.styl')
+@import url('./interactiveButtons.styl')
+@import url('./notifications.styl')
+@import url('./discord.styl')
+@import url('./tooltips.styl')
+@import url('./behindTheScene.styl')
+@import url('./map.styl')
+
+.classic-links
+    position fixed
+    left 12px
+    bottom 12px
+    z-index 8
+    display flex
+    gap 8px
+    font-family 'Nunito', sans-serif
+    font-size 13px
+    font-weight 700
+
+    a
+        padding 6px 10px
+        border-radius 6px
+        color #fff
+        text-decoration none
+        background rgba(40, 14, 40, 0.72)
+        border 1px solid rgba(255, 255, 255, 0.25)
+
+        &:hover
+        &:focus-visible
+            background #C21515
+            outline 2px solid #fff
+            outline-offset 2px
+
+.load-error
+    position fixed
+    top 0
+    left 0
+    right 0
+    bottom 0
+    z-index 100
+    display flex
+    align-items center
+    justify-content center
+    background rgba(20, 8, 24, 0.92)
+    color #fff
+    font-family 'Nunito', sans-serif
+    text-align center
+
+    &[hidden]
+        display none
+
+    .box
+        max-width 420px
+        padding 24px
+
+    .title
+        font-size 28px
+        font-weight 900
+        margin 0 0 12px
+
+    .text
+        margin 0 0 8px
+
+    .sub
+        opacity 0.7
+        font-size 14px
+
+    .actions
+        display flex
+        flex-wrap wrap
+        gap 10px
+        justify-content center
+        margin-top 16px
+
+        button
+        a
+            padding 10px 16px
+            border-radius 6px
+            border 0
+            background #C21515
+            color #fff
+            font inherit
+            font-weight 700
+            text-decoration none
+            cursor pointer
+
+.noscript-box
+    position fixed
+    top 0
+    left 0
+    right 0
+    bottom 0
+    z-index 200
+    display flex
+    align-items center
+    justify-content center
+    padding 24px
+    background #1a0a1c
+    color #fff
+    font-family sans-serif
+    text-align center
+
+    a
+        color #ffb3b3

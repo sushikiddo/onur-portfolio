@@ -9,62 +9,37 @@ html.lenis,html.lenis body{height:auto}
 html.pf-lenis{scroll-behavior:auto}
 main,.site-footer{overflow-x:clip}
 
-/* Fixed WebGL layer (dust + media planes), one canvas on every page; scene.js draws it */
-body>canvas.gl-layer{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block}
-html.gl-media{background:var(--paper)}
-html.gl-media body{background:transparent}
-html.gl-media main{position:relative;z-index:1;background:transparent}
-html.gl-media .site-footer{position:relative;z-index:2;background:transparent}
-/* Planes replace the DOM image; the <img> keeps layout, a11y and is the fallback. Frames must not paint over the canvas. */
-html.gl-media img.gl-on{opacity:0}
-html.gl-media .card .visual,html.gl-media .card .image,html.gl-media .gallery .visual,html.gl-media .article .visual,html.gl-media .portrait{background:transparent}
-
 /* Line-by-line text reveal (cinematic.js splits text into .split-line > span) */
 html.split-pending :is(.pagehead h1,.pagehead .lead,.section-heading h2,.section-heading p,.home-intro .lead,.hero-copy h1,.hero-tagline,.bio-copy,.footer-signature,.notes-section blockquote p){visibility:hidden}
 .split-line{display:block;overflow:hidden;padding:0 .08em .14em;margin:0 -.08em -.14em}
-.split-line>span{display:block;transform:translateY(110%);transition:transform 1s cubic-bezier(.2,.7,.1,1);transition-delay:calc(var(--i,0)*70ms);will-change:transform}
+.split-line>span{display:block;transform:translateY(110%);transition:transform .6s cubic-bezier(.2,.7,.1,1);transition-delay:calc(var(--i,0)*40ms);will-change:transform}
 .split-ready.is-in .split-line>span{transform:none}
 .footer-signature .split-line{display:inline-block}
 
-.page-curtain{position:fixed;inset:0;z-index:9998;pointer-events:none;transform:translateY(-105%);background:#EADFCB;will-change:transform}
-.page-curtain::after{content:"";position:absolute;inset:auto 0 0;height:2px;background:#B4532A}
-html[data-theme="dark"] .page-curtain{background:#27221D}
-html[data-theme="dark"] .page-curtain::after{background:#D9774A}
-.page-curtain.curtain-enter{animation:curtain-reveal .5s cubic-bezier(.76,0,.24,1) both}
-.page-curtain.curtain-exit{animation:curtain-cover .3s cubic-bezier(.76,0,.24,1) both}
-@keyframes curtain-cover{from{transform:translateY(105%)}to{transform:translateY(0)}}
-@keyframes curtain-reveal{from{transform:translateY(0)}to{transform:translateY(-105%)}}
+/* Glowing thin ring: the same loading motif as the 3D world. */
+.glow-ring,.page-curtain::before{display:block;width:72px;height:72px;border-radius:50%;border:2px solid rgba(var(--accent-rgb),.22);border-top-color:var(--olive);border-right-color:var(--accent);box-shadow:0 0 26px rgba(var(--accent-rgb),.5),inset 0 0 18px rgba(var(--accent-rgb),.2);animation:ring-spin 1.1s linear infinite}
+@keyframes ring-spin{to{transform:rotate(360deg)}}
 
-/* Preloader (first home view per session): label left, count right, mark centred; the mark swells as the sheet lifts */
-.preloader{position:fixed;inset:0;z-index:9999;background:var(--paper,#F3ECDF);color:var(--ink,#2B2420);display:flex;align-items:flex-end;justify-content:space-between;padding:28px clamp(20px,4vw,48px);font:500 12px/1 Manrope,system-ui,sans-serif;letter-spacing:.14em;pointer-events:all}
-html[data-theme="dark"] .preloader{background:var(--paper,#1E1A16);color:#EFE6D6}
-.preloader-mark{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;display:block;color:inherit;transition:transform .9s cubic-bezier(.76,0,.24,1),opacity .6s ease .1s}
-.preloader-mark svg{display:block;animation:pl-pulse 1.8s ease-in-out infinite}
+/* Page transition: dark warm veil with the ring; decorative only, never intercepts input. */
+.page-curtain{position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:0;visibility:hidden;background:radial-gradient(ellipse at 50% 45%,var(--veil-a) 0%,var(--veil-b) 62%)}
+.page-curtain::before{content:"";position:absolute;left:50%;top:50%;margin:-36px 0 0 -36px}
+.page-curtain.curtain-enter{animation:curtain-reveal .45s ease both}
+.page-curtain.curtain-exit{animation:curtain-cover .3s ease both}
+@keyframes curtain-cover{from{opacity:0;visibility:visible}to{opacity:1;visibility:visible}}
+@keyframes curtain-reveal{from{opacity:1;visibility:visible}to{opacity:0;visibility:hidden}}
+
+/* Preloader (first home view per session): label left, count right, glowing ring centred; it fades out softly */
+.preloader{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at 50% 45%,var(--veil-a) 0%,var(--veil-b) 62%);color:var(--ink);display:flex;align-items:flex-end;justify-content:space-between;padding:28px clamp(20px,4vw,48px);font:700 12px/1 Nunito,system-ui,sans-serif;letter-spacing:.14em;pointer-events:none}
+.preloader-mark{position:absolute;left:50%;top:50%;width:72px;height:72px;margin:-36px 0 0 -36px;display:block;transition:transform .6s cubic-bezier(.4,0,.2,1),opacity .45s ease}
 .preloader-count{font-variant-numeric:tabular-nums}
-.preloader.is-leaving{transform:translateY(-100%);transition:transform .8s cubic-bezier(.76,0,.24,1)}
-.preloader.is-leaving .preloader-mark{transform:scale(7);opacity:0}
+.preloader.is-leaving{opacity:0;transition:opacity .55s ease}
+.preloader.is-leaving .preloader-mark{transform:scale(2.4);opacity:0}
 .preloader-label,.preloader-count{transition:opacity .3s ease}
 .preloader.is-leaving .preloader-label,.preloader.is-leaving .preloader-count{opacity:0}
-@keyframes pl-pulse{0%,100%{transform:scale(.92)}50%{transform:scale(1.06)}}
-
-/* Scroll cue: fixed, centred; a highlight runs down a hairline */
-.scroll-cue{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:40;display:flex;flex-direction:column;align-items:center;gap:8px;font:500 11px/1 Manrope,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--muted,#5E5248);pointer-events:none;transition:opacity .3s}
-.scroll-cue i{position:relative;display:block;width:1px;height:56px;background:var(--line,#D6C8B2);overflow:hidden}
-.scroll-cue i::after{content:"";position:absolute;left:0;top:0;width:100%;height:50%;background:var(--accent,#B4532A);animation:cue-run 1.8s cubic-bezier(.65,0,.35,1) infinite}
-.scroll-cue.is-hidden{opacity:0;pointer-events:none}
-.scroll-cue:not(.is-hidden){pointer-events:auto;cursor:pointer}
-@keyframes cue-run{from{transform:translateY(-100%)}to{transform:translateY(200%)}}
-
-/* Status pill (every page but contact; sits under the nav, desktop only) */
-.status-pill{position:fixed;top:88px;right:24px;z-index:50;display:inline-flex;align-items:center;gap:9px;padding:10px 16px;border:1px solid var(--line,#D6C8B2);border-radius:999px;font:500 11px/1 Manrope,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;color:var(--ink,#2B2420);background:color-mix(in srgb,var(--paper,#F3ECDF) 70%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:border-color .25s}
-.status-pill:hover,.status-pill:focus-visible{border-color:var(--ink,#2B2420)}
-.status-pill i{width:6px;height:6px;border-radius:50%;background:var(--accent,#B4532A);animation:pill-pulse 2s ease-out infinite}
-@keyframes pill-pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent,#B4532A) 45%,transparent)}70%,100%{box-shadow:0 0 0 7px transparent}}
-@media(max-width:767px){.status-pill,.scroll-cue{display:none}}
 
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  .page-curtain,.scroll-cue,.preloader{display:none}
+  .page-curtain,.preloader{display:none}
+  .glow-ring{animation:none}
   .split-line>span{transform:none!important;transition:none}
-  .status-pill i{animation:none}
 }

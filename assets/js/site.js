@@ -7,22 +7,28 @@
     const label = document.querySelector('[data-field="skill-' + el.dataset.skillFill + '"]');
     const value = Number(label?.textContent.match(/\d+(?:[.,]\d+)?/)?.[0]?.replace(',', '.'));
     el.style.width = (Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 0) + '%';
+    const track = el.closest('[role="progressbar"]'); if (track && Number.isFinite(value)) track.setAttribute('aria-valuenow', String(Math.round(value)));
   });
-  const themeKey = 'portfolio-theme';
-  try { root.dataset.theme = localStorage.getItem(themeKey) === 'light' ? 'light' : 'dark'; }
-  catch { root.dataset.theme = 'dark'; }
-  document.querySelectorAll('[data-theme-toggle]').forEach(button => {
-    const update = () => {
-      button.setAttribute('aria-pressed', String(root.dataset.theme === 'dark'));
+  const themeKey = 'portfolio-theme-v2';
+  try { localStorage.removeItem('portfolio-theme'); } catch {}
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  const applyTheme = (theme, save) => {
+    root.dataset.theme = theme;
+    if (metaTheme) metaTheme.setAttribute('content', theme === 'light' ? '#f6f6f4' : '#15110f');
+    if (save) { try { localStorage.setItem(themeKey, theme); } catch {} }
+    document.querySelectorAll('[data-theme-toggle]').forEach(button => {
+      const dark = theme === 'dark';
+      button.setAttribute('aria-pressed', String(dark));
       button.setAttribute('aria-label', english ? 'Dark theme' : 'Koyu tema');
-    };
-    button.addEventListener('click', () => {
-      root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
-      try { localStorage.setItem(themeKey, root.dataset.theme); } catch {}
-      update();
+      button.title = english ? (dark ? 'Switch to light theme' : 'Switch to dark theme') : (dark ? 'Açık temaya geç' : 'Koyu temaya geç');
     });
-    update();
-  });
+  };
+  let stored = null;
+  try { stored = localStorage.getItem(themeKey); } catch {}
+  applyTheme(stored === 'light' ? 'light' : 'dark', false);
+  document.querySelectorAll('[data-theme-toggle]').forEach(button =>
+    button.addEventListener('click', () => applyTheme(root.dataset.theme === 'dark' ? 'light' : 'dark', true)));
+  addEventListener('storage', event => { if (event.key === themeKey) applyTheme(event.newValue === 'light' ? 'light' : 'dark', false); });
   const menu = document.querySelector('[data-menu]');
   const nav = document.querySelector('.navlinks');
   if (menu && nav) {
@@ -45,15 +51,15 @@
   document.querySelector('[data-contact-form]')?.addEventListener('submit', async event => {
     event.preventDefault();
     const form=event.currentTarget, button=form.querySelector('button[type="submit"]'), status=document.querySelector('#form-status');
-    if(button.disabled)return;
-    button.disabled=true; status.textContent=english?'Sending…':'Gönderiliyor…';
-    try {
-      const response=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(new FormData(form))),signal:AbortSignal.timeout(20000)});
-      const data=await response.json();
-      if(!response.ok)throw Error(english?'Unable to send. Please check the fields or try again later.':data.error||'Mesaj gönderilemedi.');
-      form.reset();status.textContent=english?'Your message was sent successfully. Thank you!':'Mesajın başarıyla gönderildi. Teşekkürler!';
-    }catch(error){status.textContent=english?'Unable to send. Please try again.':error.name==='TimeoutError'?'Bağlantı zaman aşımına uğradı. Lütfen tekrar dene.':'Mesaj gönderilemedi. '+error.message;}
-    finally{button.disabled=false;}
+    // Sunucuya veri gönderilmez: ziyaretçinin e-posta uygulaması hazır mesajla açılır.
+    const data=Object.fromEntries(new FormData(form));
+    if(data.website)return; // bot tuzağı
+    const to=(document.querySelector('[data-contact-link="email"] [data-field]')?.textContent||'').trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)){status.textContent=english?'Email address is unavailable.':'E-posta adresi bulunamadı.';return;}
+    const clean=v=>String(v||'').replace(/[\r\n]+/g,' ').trim();
+    const body=(english?'Name: ':'Ad soyad: ')+clean(data.name)+'\n'+(english?'Email: ':'E-posta: ')+clean(data.email)+'\n\n'+String(data.message||'').trim();
+    location.href='mailto:'+to+'?subject='+encodeURIComponent(clean(data.subject))+'&body='+encodeURIComponent(body);
+    status.textContent=english?'Your email app is opening with the message ready. Press send there to finish.':'E-posta uygulaman mesaj hazır şekilde açılıyor. Göndermek için oradaki Gönder düğmesine bas.';
   });
   document.querySelectorAll('.bio-copy').forEach(copy => {
     const paragraphs = copy.textContent.split(/\n\s*\n/).filter(text => text.trim());
@@ -73,7 +79,7 @@
   const nav = document.querySelector('.navlinks');
   if (!nav || !HTMLDialogElement.prototype.showModal) return;
   const css = document.createElement('link');
-  css.rel = 'stylesheet'; css.href = new URL('../css/command.css', script.src); document.head.append(css);
+  css.rel = 'stylesheet'; css.href = new URL('../css/command.css?v=20261122', script.src); document.head.append(css);
   const button = document.createElement('button');
   button.type = 'button'; button.className = 'command-launch'; button.textContent = '⌘';
   button.setAttribute('aria-label', en ? 'Quick navigation (Ctrl+K)' : 'Hızlı gezinme (Ctrl+K)');
@@ -89,10 +95,10 @@
   dialog.querySelector('.command-close').setAttribute('aria-label', en ? 'Close' : 'Kapat');
   dialog.querySelector('.command-hint').textContent = en ? '↑ ↓ navigate   ↵ open   esc close' : '↑ ↓ gezin   ↵ aç   esc kapat';
   const names = en ? ['Home','About','Projects','Journal','Gallery','Contact'] : ['Anasayfa','Hakkımda','Projeler','Blog','Galeri','İletişim'];
-  const files = en ? ['en/index.html','en/about.html','en/projects.html','en/blog.html','en/gallery.html','en/contact.html'] : ['index.html','hakkimda.html','projeler.html','blog.html','galeri.html','iletisim.html'];
+  const files = en ? ['en/index.html','en/about.html','en/projects.html','en/blog.html','en/gallery.html','en/contact.html'] : ['anasayfa.html','hakkimda.html','projeler.html','blog.html','galeri.html','iletisim.html'];
   const entries = names.map((name,i) => ({name, file:files[i], hint:String(i+1).padStart(2,'0')}));
   entries.push({name:en?'Play Space Survivor':'Space Survivor oyna',file:'oyun/index.html',hint:en?'GAME':'OYUN'});
-  entries.push({name:en?'Switch theme':'Temayı değiştir',theme:true,hint:en?'ACTION':'İŞLEM'});
+  entries.push({name:en?'3D world':'3D dünya',file:'/',hint:'3D'});
   let selected = 0, opener;
   const results = dialog.querySelector('.command-results');
   function select(index) {
@@ -127,4 +133,30 @@
   dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close();});
   dialog.addEventListener('close',()=>opener?.focus());
   document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){event.preventDefault();dialog.open?dialog.close():open();}});
+  // Consent notice: only essential local storage is used today; the choice is kept as a flag for any future analytics.
+  const english = document.documentElement.lang === 'en';
+  const consentKey = 'portfolio-consent';
+  let consent = null;
+  try { consent = localStorage.getItem(consentKey); } catch {}
+  window.__consent = { choice: consent, analytics: consent === 'all' };
+  if (consent !== 'all' && consent !== 'essential') {
+    const box = document.createElement('section');
+    box.className = 'consent';
+    box.setAttribute('role', 'region');
+    box.setAttribute('aria-label', english ? 'Privacy notice' : 'Gizlilik bildirimi');
+    box.innerHTML = '<p>' + (english
+      ? 'This site only uses essential local storage (theme and language choice, admin panel session). There are no tracking or advertising cookies. Fonts load from Google Fonts.'
+      : "Bu site yalnız zorunlu yerel depolama kullanır (tema/dil tercihi, yönetim paneli oturumu). Takip veya reklam çerezi yoktur. Yazı tipleri Google Fonts’tan yüklenir.") + '</p>' +
+      '<div class="consent-actions"><button type="button" class="btn" data-consent="all">' + (english ? 'Accept' : 'Kabul et') +
+      '</button><button type="button" class="btn ghost" data-consent="essential">' + (english ? 'Essential only' : 'Yalnız zorunlu') + '</button></div>';
+    box.addEventListener('click', event => {
+      const b = event.target.closest('[data-consent]');
+      if (!b) return;
+      const choice = b.dataset.consent;
+      try { localStorage.setItem(consentKey, choice); } catch {}
+      window.__consent = { choice, analytics: choice === 'all' };
+      box.remove();
+    });
+    document.body.append(box);
+  }
 })();
