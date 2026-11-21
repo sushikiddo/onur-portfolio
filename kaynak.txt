@@ -11,12 +11,9 @@ Phantom responsive bileşenleri assets/css/style.css ile kişiselleştirilmiş, 
 Phantom demo fotoğrafı pic01.jpg yalnızca dekoratif hero arka planında kullanılmıştır; kullanıcı fotoğrafı değildir.
 Proje ve galeri SVG'leri özgün yer tutucu görsellerdir.
 
-YAZI TİPLERİ (assets/fonts, yerel olarak barındırılır)
-Bricolage Grotesque — Mathieu Triay · SIL Open Font License 1.1
-Manrope — Mikhail Sharanda · SIL Open Font License 1.1
-Instrument Serif — Instrument · SIL Open Font License 1.1
-JetBrains Mono — JetBrains · SIL Open Font License 1.1
-Dosyalar Fontsource (fontsource.org) paketlerinden alınmıştır: https://fontsource.org
+YAZI TİPLERİ
+Amatic SC ve Nunito — Google Fonts üzerinden yüklenir (SIL Open Font License 1.1)
+JetBrains Mono — JetBrains · SIL Open Font License 1.1 (assets/fonts altında yerel olarak barındırılır, Fontsource paketinden alınmıştır: https://fontsource.org)
 
 EKLENENLER
 404.html: Cloudflare Pages'in bulunamayan adresler için otomatik gösterdiği özel hata sayfası.

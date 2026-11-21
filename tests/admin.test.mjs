@@ -15,7 +15,7 @@ const auth={'Cookie':'session='+'a'.repeat(64)};
 test('public site includes Komur and current design without mutating stored pages',async()=>{const s=setup();const r=await worker.fetch(req('/anasayfa.html'),s.env);assert.equal(r.status,200);const t=await r.text();assert.match(t,/Kömür/);assert.match(t,/og:site_name/);assert.equal(s.get().siteVersion,undefined)});
 test('admin data requires a session',async()=>{const s=setup();const r=await worker.fetch(req('/api/data'),s.env);assert.equal(r.status,401)});
 test('authenticated model includes editable Komur fields and old content',async()=>{const s=setup();const r=await worker.fetch(req('/api/data',{headers:auth}),s.env);assert.equal(r.status,200);const d=await r.json();assert.equal(d.fields['project-4-title-tr'],'Kömür');assert.ok(d.fields['project-4-p1-tr']);assert.ok(d.fields['bio-tr']);assert.ok(d.projects.some(p=>p.id===4&&p.title_tr==='Kömür'))});
-test('save keeps legacy pages and updates public Komur page',async()=>{const s=setup();const r=await worker.fetch(req('/api/save',{method:'POST',headers:{...auth,Origin:'https://example.pages.dev','Content-Type':'application/json'},body:JSON.stringify({fields:{'project-4-p1-tr':'Yeni <güvenli> açıklama'}})}),s.env);assert.equal(r.status,200);assert.deepEqual(s.get().legacyPagesBefore20261117,pages);assert.equal(s.get().siteVersion,'human-20261122-v4');const page=await worker.fetch(req('/komur'),s.env);assert.equal(page.status,200);assert.match(await page.text(),/Yeni &lt;güvenli&gt; açıklama/)});
+test('save keeps legacy pages and updates public Komur page',async()=>{const s=setup();const r=await worker.fetch(req('/api/save',{method:'POST',headers:{...auth,Origin:'https://example.pages.dev','Content-Type':'application/json'},body:JSON.stringify({fields:{'project-4-p1-tr':'Yeni <güvenli> açıklama'}})}),s.env);assert.equal(r.status,200);assert.deepEqual(s.get().legacyPagesBefore20261117,pages);assert.equal(s.get().siteVersion,'human-20261122-v5');const page=await worker.fetch(req('/komur'),s.env);assert.equal(page.status,200);assert.match(await page.text(),/Yeni &lt;güvenli&gt; açıklama/)});
 test('cross-origin writes remain denied',async()=>{const s=setup();const r=await worker.fetch(req('/api/save',{method:'POST',headers:{...auth,Origin:'https://other.invalid'},body:'{}'}),s.env);assert.equal(r.status,403)});
 test('revision conflict does not overwrite content',async()=>{const s=setup();s.setConflict();const before=s.get();const r=await worker.fetch(req('/api/save',{method:'POST',headers:{...auth,Origin:'https://example.pages.dev'},body:JSON.stringify({fields:{'project-4-title-tr':'Kömür yeni'}})}),s.env);assert.equal(r.status,409);assert.deepEqual(s.get(),before)});
 test('private admin stays protected and logout script is private',async()=>{const s=setup();for(const p of ['/admin/','/admin/session.js']){const r=await worker.fetch(req(p),s.env);assert.ok([303,404].includes(r.status))}});
@@ -49,4 +49,19 @@ test('version migration does not resurrect projects deleted in the panel',async(
  s=setup({pages:build([1,3]),fields:{},siteVersion:'komur-20261117-v1'});
  t=await (await worker.fetch(req('/projeler.html'),s.env)).text();
  assert.ok(t.includes('data-project-id="3"')&&!t.includes('data-project-id="2"'),'inferred deletion stays deleted');
+});
+
+test('404.html is publicly fetchable for ZIP export and CSP includes script-src',async()=>{
+ const s=setup();
+ const r=await worker.fetch(req('/404.html'),s.env);
+ assert.equal(r.status,200);
+ assert.match(r.headers.get('content-security-policy')||'',/script-src 'self'/);
+});
+
+test('serveMedia falls back to static ASSETS when D1 uploads has no row',async()=>{
+ const s=setup();
+ const origPrepare=s.env.DB.prepare;
+ s.env.DB.prepare=sql=>sql.includes('FROM uploads')?{bind(){return this},async first(){return null}}:origPrepare.call(s.env.DB,sql);
+ const r=await worker.fetch(req('/media/8927bb45-486d-4006-b79e-bdb903626fca.png'),s.env);
+ assert.equal(r.status,200);
 });
