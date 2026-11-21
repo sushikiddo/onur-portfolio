@@ -9,7 +9,9 @@ out = root / f"{no}-WEB.zip"
 with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
     for p in sorted(root.rglob("*")):
         rel = p.relative_to(root)
-        if p.is_dir() or rel.parts[0] in skip_dirs or p.name in skip_files or p.suffix in {".zip", ".PDF"}:
+        # Dot folders/files (.git, .wrangler with Cloudflare account data, .gitignore) never ship.
+        if p.is_dir() or rel.parts[0] in skip_dirs or any(part.startswith(".") for part in rel.parts) \
+                or p.name in skip_files or p.suffix in {".zip", ".PDF"}:
             continue
         z.write(p, rel.as_posix())
 shutil.copy(out, out.with_suffix(".PDF"))
