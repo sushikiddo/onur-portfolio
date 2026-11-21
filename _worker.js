@@ -680,12 +680,10 @@ async function dispatch(request, env) {
   } else if (path.startsWith("/media/")) response2 = await serveMedia(request, env);
   else if (path === "/" || path === "/index.html") response2 = await env.ASSETS.fetch(request); // "/" belongs to the 3D world; the classic home is /anasayfa.html
   else if (sitePages.has(path)) response2 = await servePage(request, env);
-  else if (publicAsset(path)) {
-    response2 = await env.ASSETS.fetch(request);
-    if (path === "/404.html" && response2.status === 404 && (response2.headers.get("content-type") || "").includes("text/html")) {
-      response2 = new Response(response2.body, { status: 200, headers: response2.headers });
-    }
-  }
+  else if (path === "/404.html") {
+    const bytes = await staticRead(env, "/404.html");
+    response2 = bytes ? response(bytes, 200, PAGE_HEADERS) : await notFoundPage(env, request);
+  } else if (publicAsset(path)) response2 = await env.ASSETS.fetch(request);
   else return notFoundPage(env, request);
   if (method === "HEAD") return new Response(null, { status: response2.status, statusText: response2.statusText, headers: response2.headers });
   return response2;
