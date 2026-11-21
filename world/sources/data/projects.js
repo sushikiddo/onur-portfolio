@@ -5,7 +5,8 @@ export default [
         url: '/komur.html',
         attributes:
         {
-            role: [ 'Python', 'Tkinter', 'Yapay zekâ' ]
+            role: 'Geliştirici',
+            with: [ 'Python', 'Tkinter' ]
         },
         distinctions: [],
         images:
@@ -19,7 +20,8 @@ export default [
         url: '/oyun/index.html',
         attributes:
         {
-            role: [ 'HTML5 Canvas', 'JavaScript' ]
+            role: 'Geliştirici',
+            with: [ 'JavaScript', 'Canvas' ]
         },
         distinctions: [],
         images:
@@ -33,7 +35,8 @@ export default [
         url: 'https://github.com/sushikiddo/multistream-viewer',
         attributes:
         {
-            role: [ 'JavaScript', 'Web' ]
+            role: 'Geliştirici',
+            with: 'Electron'
         },
         distinctions: [],
         images:
@@ -47,7 +50,8 @@ export default [
         url: '/projeler.html',
         attributes:
         {
-            role: [ 'Three.js', 'Cloudflare Pages' ]
+            role: [ 'Tasarım', 'Kod' ],
+            with: [ 'Three.js', 'Cloudflare' ]
         },
         distinctions: [],
         images:

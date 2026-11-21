@@ -44,9 +44,3 @@ world/       3D dünyanın kaynak kodu
 _worker.js   Sayfaları ve dosyaları sunan Cloudflare worker
 tests/       Worker testleri (node --test tests/admin.test.mjs)
 ```
-
-## Kaynaklar ve lisanslar
-
-- Klasik sitenin ilk sürümü HTML5 UP "Phantom" şablonundan yola çıktı; atıflar `kaynak.txt` ve `LICENSE-Phantom.txt` dosyalarında.
-- 3D dünya MIT lisanslı açık kaynak bir projeden uyarlandı; lisans metni `world/license.md` dosyasında.
-- Diğer lisans notları `LICENSE-NOTE.txt` içinde.

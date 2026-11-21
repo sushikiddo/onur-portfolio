@@ -7,5 +7,3 @@ npm install
 npm run dev      # yerel önizleme
 npm run build    # çıktı: world/dist
 ```
-
-Kod MIT lisanslı bir açık kaynak projeden uyarlanmıştır; lisans metni `license.md` dosyasındadır.
