@@ -1,27 +1,52 @@
-# Onur Can Orhan — Portfolyo
+# Onur Can Orhan — Kişisel Web Sitesi
 
-Canlı site: https://onurcanorhan.pages.dev/
+**Canlı site:** https://onurcanorhan.pages.dev/
 
-Türkçe ve İngilizce çok sayfalı statik portfolyo. Kömür proje sayfası, GitHub kaynakları ve Windows 2.1 indirme bağlantıları içerir.
+Akdeniz Üniversitesi Bilgisayar Programcılığı öğrencisi olarak kendimi, projelerimi ve yazılarımı tanıttığım kişisel web sitem. "Web Tasarımının Temelleri" dersi vize projesi olarak hazırlandı.
 
-## Yerel önizleme
+## Site nasıl çalışıyor?
 
-python -m http.server 8000
+Site iki parçadan oluşuyor:
 
-Ardından http://localhost:8000/ adresini açın.
+- **3D dünya (ana sayfa):** Siteyi açınca tarayıcıda arabayla gezilen küçük bir 3D dünya karşılıyor. Projelerim, kariyer yolum, iletişim ve sosyal bağlantılarım dünyanın içindeki alanlarda duruyor; bir alana arabayla yaklaşınca ilgili içerik açılıyor. Sol alt köşedeki "Klasik site" ve "English" bağlantılarıyla istediğin an normal sayfalara geçebilirsin.
+- **Klasik site:** Aynı içeriği sade sayfalarda okumak isteyenler için. Türkçe ve İngilizce, telefon ve tablete uyumlu, açık/koyu tema seçenekli.
 
-## Yayın
+## Sayfalar
 
-Cloudflare Pages üzerinde onurcanorhan projesine kök klasör içeriği yayımlanır; derleme adımı gerekmez. _worker.js canlı sayfaları ve parola korumalı yönetimi sunar. Production ortamında DB bağlaması mevcut onur-portfolio-db D1 veritabanını göstermelidir. Site EXE barındırmaz: indirmeler sushikiddo/komur GitHub Releases üzerinden sunulur.
+| Sayfa | İçerik |
+|---|---|
+| Anasayfa | Kısa tanıtım, öne çıkan projeler, galeriden örnekler, son yazılar |
+| Hakkımda | Vesikalık fotoğraf, özgeçmiş, ders programı, ilgi alanları ve yüzdeli yetenekler |
+| Projeler | Kömür (masaüstü kedi asistanı), Space Survivor (tarayıcı oyunu), Multistream Viewer ve bu site |
+| Blog | HTML5, CSS3 ile responsive tasarım ve yazılımda yapay zekâ üzerine üç yazı |
+| Galeri | Kendi fotoğraflarım ve projelerimden ekran görüntüleri |
+| İletişim | Adres, telefon ve iletişim formu (form e-posta uygulamanı açar, site bilgi saklamaz) |
 
-## Canlı yönetim
+## Kullanılan teknolojiler
 
-Panel: https://onurcanorhan.pages.dev/admin/
+- **Klasik site:** HTML5, CSS3, JavaScript
+- **3D dünya:** Three.js (WebGPU/WebGL), Rapier fizik motoru, Howler.js, Vite
+- **Barındırma:** Cloudflare Pages ve Pages Functions (worker), içerik için Cloudflare D1
+- **Erişilebilirlik ve SEO:** her sayfada ayrı başlık ve açıklama, TR/EN eşleşmesi (hreflang), yapılandırılmış veri, site haritası, ekran okuyucu etiketleri, azaltılmış hareket desteği
 
-Mevcut parola korunur. Kömür başlık/açıklamaları Projeler bölümündedir. Kaydet canlı D1 içeriğine uygulanır. Eski sayfalar ilk kayıtta legacyPagesBefore20261117 alanında korunur; sorgular veri yazmaz. İlk içerik geçişi revision kontrolüyle gerçekleşir.
+## Gizlilik ve güvenlik
 
-Testler: node --test tests/admin.test.mjs
+- Takip ya da reklam çerezi yok, analitik kullanılmıyor.
+- İletişim formu sunucuya veri göndermez; mesaj ziyaretçinin kendi e-posta uygulamasında hazırlanır.
+- Tüm yanıtlarda güvenlik başlıkları (HTTPS zorunluluğu, başka sitelere gömülme engeli vb.) bulunur.
 
-## Kaynak ve lisans
+## Klasör yapısı
 
-HTML5 UP Phantom şablonu ve atıfları kaynak.txt ve LICENSE-Phantom.txt dosyalarındadır. Diğer lisans notları LICENSE-NOTE.txt içinde bulunur.
+```
+/            Klasik sitenin sayfaları (TR) ve en/ (İngilizce)
+assets/      Stil dosyaları, betikler ve görseller
+world/       3D dünyanın kaynak kodu
+_worker.js   Sayfaları ve dosyaları sunan Cloudflare worker
+tests/       Worker testleri (node --test tests/admin.test.mjs)
+```
+
+## Kaynaklar ve lisanslar
+
+- Klasik sitenin ilk sürümü HTML5 UP "Phantom" şablonundan yola çıktı; atıflar `kaynak.txt` ve `LICENSE-Phantom.txt` dosyalarında.
+- 3D dünya MIT lisanslı açık kaynak bir projeden uyarlandı; lisans metni `world/license.md` dosyasında.
+- Diğer lisans notları `LICENSE-NOTE.txt` içinde.
