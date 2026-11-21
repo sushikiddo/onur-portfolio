@@ -49,10 +49,14 @@
 
         <canvas class="js-canvas"></canvas>
 
-        <!-- Classic site links -->
-        <nav class="classic-links" aria-label="Klasik site ve dil">
-            <a href="/anasayfa.html">Klasik site</a>
-            <a href="/en/index.html" hreflang="en" lang="en">English</a>
+        <!-- Quick site navigation (opens inside 3D world overlay) -->
+        <nav class="classic-links" aria-label="Hızlı gezinme">
+            <a href="/hakkimda.html" data-page-title="Hakkımda">Hakkımda</a>
+            <a href="/projeler.html" data-page-title="Projeler">Projeler</a>
+            <a href="/blog.html" data-page-title="Blog">Blog</a>
+            <a href="/galeri.html" data-page-title="Galeri">Galeri</a>
+            <a href="/iletisim.html" data-page-title="İletişim">İletişim</a>
+            <a href="/en/index.html" data-page-title="English" hreflang="en" lang="en">EN</a>
         </nav>
 
         <!-- Load error -->
@@ -864,6 +868,24 @@
                 <div class="js-map-container map-container">
                     <img alt="" class="js-texture texture" loading="lazy">
                     <div class="js-player player"></div>
+                </div>
+            </div>
+
+            <!-- Page viewer (classic pages & game inside 3D world) -->
+            <div class="js-modal modal page-viewer" data-name="page">
+                <div class="page-viewer-shell">
+                    <div class="page-viewer-bar">
+                        <span class="js-page-title page-viewer-title">Onur Can Orhan</span>
+                        <div class="page-viewer-actions">
+                            <button type="button" class="js-page-theme page-viewer-theme" aria-pressed="true" aria-label="Tema değiştir" title="Açık temaya geç">☾</button>
+                            <a class="js-page-external page-viewer-ext" href="/anasayfa.html" target="_blank" rel="noreferrer">Tam sayfa ↗</a>
+                            <button class="js-close page-viewer-close" aria-label="Kapat">
+                                <img alt="" class="icon is-default" src="ui/close.svg" loading="lazy">
+                                <span class="icon is-xbox">A</span>
+                            </button>
+                        </div>
+                    </div>
+                    <iframe class="js-page-frame page-viewer-frame" title="İçerik"></iframe>
                 </div>
             </div>
 

@@ -99,6 +99,15 @@ export class ClosingManager
             {
                 this.game.inputs.filters.add('racing')
             }
+            else if(
+                this.game.world.areas?.projects?.state === ProjectsArea.STATE_OPEN ||
+                this.game.world.areas?.projects?.state === ProjectsArea.STATE_OPENING ||
+                this.game.world.areas?.lab?.state === LabArea.STATE_OPEN ||
+                this.game.world.areas?.lab?.state === LabArea.STATE_OPENING
+            )
+            {
+                this.game.inputs.filters.add('cinematic')
+            }
             else
             {
                 this.game.inputs.filters.add('wandering')

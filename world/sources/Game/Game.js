@@ -217,6 +217,8 @@ export class Game
 
     reset()
     {
+        this.respawns?.clearSavedState?.()
+
         // Interactive buttons
         this.inputs.interactiveButtons.clearItems()
 

@@ -2,6 +2,21 @@
   'use strict';
   const root = document.documentElement;
   const english = root.lang === 'en';
+  const embedded = (() => { try { return window.self !== window.top || new URLSearchParams(location.search).has('embed'); } catch { return true; } })();
+  if (embedded) {
+    root.classList.add('is-embed');
+    document.addEventListener('click', event => {
+      const link = event.target.closest('a[href="/"]');
+      if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      try { window.parent.postMessage({ type: 'close-site-modal' }, location.origin); } catch {}
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !document.querySelector('dialog[open]')) {
+        try { window.parent.postMessage({ type: 'close-site-modal' }, location.origin); } catch {}
+      }
+    });
+  }
   root.classList.add('js');
   document.querySelectorAll('[data-skill-fill]').forEach(el => {
     const label = document.querySelector('[data-field="skill-' + el.dataset.skillFill + '"]');
@@ -29,6 +44,12 @@
   document.querySelectorAll('[data-theme-toggle]').forEach(button =>
     button.addEventListener('click', () => applyTheme(root.dataset.theme === 'dark' ? 'light' : 'dark', true)));
   addEventListener('storage', event => { if (event.key === themeKey) applyTheme(event.newValue === 'light' ? 'light' : 'dark', false); });
+  if (embedded) {
+    addEventListener('message', event => {
+      if (event.origin !== location.origin) return;
+      if (event.data && event.data.type === 'set-site-theme') applyTheme(event.data.theme === 'light' ? 'light' : 'dark', false);
+    });
+  }
   const menu = document.querySelector('[data-menu]');
   const nav = document.querySelector('.navlinks');
   if (menu && nav) {
@@ -139,7 +160,8 @@
   let consent = null;
   try { consent = localStorage.getItem(consentKey); } catch {}
   window.__consent = { choice: consent, analytics: consent === 'all' };
-  if (consent !== 'all' && consent !== 'essential') {
+  const inEmbed = document.documentElement.classList.contains('is-embed');
+  if (!inEmbed && consent !== 'all' && consent !== 'essential') {
     const box = document.createElement('section');
     box.className = 'consent';
     box.setAttribute('role', 'region');

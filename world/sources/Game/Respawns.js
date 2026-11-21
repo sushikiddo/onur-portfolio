@@ -42,9 +42,48 @@ export class Respawns
         return this.items.get(name)
     }
 
+    getSavedState()
+    {
+        if(this._savedState !== undefined)
+            return this._savedState
+
+        this._savedState = null
+        try
+        {
+            const raw = localStorage.getItem('onur-3d-state')
+            if(raw)
+            {
+                const data = JSON.parse(raw)
+                const fresh = data && typeof data.t === 'number' && (Date.now() - data.t) < 30 * 60 * 1000
+                if(fresh && Number.isFinite(data.x) && Number.isFinite(data.z) && Number.isFinite(data.rotation))
+                {
+                    this._savedState = {
+                        name: 'resume',
+                        position: new THREE.Vector3(data.x, 4, data.z),
+                        rotation: data.rotation
+                    }
+                }
+            }
+        }
+        catch {}
+
+        return this._savedState
+    }
+
+    hasSavedState()
+    {
+        return this.getSavedState() !== null
+    }
+
+    clearSavedState()
+    {
+        this._savedState = null
+        try { localStorage.removeItem('onur-3d-state') } catch {}
+    }
+
     getDefault()
     {
-        return this.items.get(this.defaultName)
+        return this.getSavedState() || this.items.get(this.defaultName)
     }
 
     getClosest(position)

@@ -24,24 +24,166 @@
     bottom 12px
     z-index 8
     display flex
-    gap 8px
+    flex-wrap wrap
+    gap 6px
+    max-width calc(100vw - 24px)
     font-family 'Nunito', sans-serif
     font-size 13px
     font-weight 700
 
     a
-        padding 6px 10px
-        border-radius 6px
-        color #fff
+        padding 6px 11px
+        border-radius 999px
+        color #f3ece6
         text-decoration none
-        background rgba(40, 14, 40, 0.72)
-        border 1px solid rgba(255, 255, 255, 0.25)
+        background rgba(21, 17, 15, 0.76)
+        border 1px solid rgba(243, 236, 230, 0.22)
+        backdrop-filter blur(8px)
+        transition background 0.2s, border-color 0.2s, color 0.2s
 
         &:hover
         &:focus-visible
-            background #C21515
+            background #ef7a3c
+            border-color #ef7a3c
+            color #15110f
             outline 2px solid #fff
             outline-offset 2px
+
+.modals
+    &.is-displayed
+        background rgba(12, 9, 8, 0.62)
+        backdrop-filter blur(6px)
+
+.modal.page-viewer
+    width min(1140px, 94vw)
+    height min(86vh, 880px)
+
+    @media only screen and (max-width 640px)
+        width 96vw
+        height 90vh
+
+    .page-viewer-shell
+        display flex
+        flex-direction column
+        width 100%
+        height 100%
+        border-radius 18px
+        overflow hidden
+        background #15110f
+        border 1px solid rgba(243, 236, 230, 0.18)
+        box-shadow 0 24px 80px rgba(0, 0, 0, 0.72)
+
+    .page-viewer-bar
+        display flex
+        align-items center
+        justify-content space-between
+        gap 12px
+        padding 12px 18px
+        background #211a17
+        border-bottom 1px solid rgba(243, 236, 230, 0.14)
+        flex-shrink 0
+
+    .page-viewer-title
+        font-family 'Amatic SC', sans-serif
+        font-size 1.7rem
+        font-weight 700
+        letter-spacing 0.03em
+        color #f3ece6
+        line-height 1
+
+    .page-viewer-actions
+        display flex
+        align-items center
+        gap 10px
+
+    .page-viewer-theme
+        display inline-flex
+        align-items center
+        justify-content center
+        width 36px
+        height 36px
+        border-radius 999px
+        border 1px solid rgba(243, 236, 230, 0.24)
+        color #f3ece6
+        font-size 1rem
+        line-height 1
+        cursor pointer
+        transition border-color 0.2s, color 0.2s, background 0.2s
+
+        &:hover
+            border-color #f2877d
+            color #ef7a3c
+
+    .page-viewer-ext
+        font-family 'Nunito', sans-serif
+        font-size 0.75rem
+        font-weight 700
+        color #ffc65c
+        text-decoration none
+        padding 6px 12px
+        border-radius 999px
+        border 1px solid rgba(255, 198, 92, 0.4)
+        transition background 0.2s, color 0.2s
+
+        &:hover
+            background #ffc65c
+            color #15110f
+
+    .page-viewer-close
+        display flex
+        align-items center
+        justify-content center
+        width 36px
+        height 36px
+        opacity 0.75
+        cursor pointer
+
+        &:hover
+            opacity 1
+
+        .icon.is-xbox
+            display none
+
+    .page-viewer-frame
+        flex 1
+        width 100%
+        height 100%
+        border 0
+        background #15110f
+
+    &.is-light
+        .page-viewer-shell
+            background #f6f6f4
+            border-color rgba(29, 24, 21, 0.16)
+
+        .page-viewer-bar
+            background #ffffff
+            border-bottom-color rgba(29, 24, 21, 0.14)
+
+        .page-viewer-title
+            color #1d1815
+
+        .page-viewer-theme
+            border-color rgba(29, 24, 21, 0.2)
+            color #1d1815
+
+            &:hover
+                border-color #c25a1f
+                color #c25a1f
+
+        .page-viewer-ext
+            color #8a5a00
+            border-color rgba(138, 90, 0, 0.4)
+
+            &:hover
+                background #8a5a00
+                color #ffffff
+
+        .page-viewer-close .icon.is-default
+            filter invert(1)
+
+        .page-viewer-frame
+            background #f6f6f4
 
 .load-error
     position fixed

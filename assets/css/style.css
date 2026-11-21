@@ -587,3 +587,9 @@ html[data-theme=light] .theme span::before{content:"\2600\FE0E"}
 .consent .btn{min-height:40px;padding:8px 18px;font-size:.85rem}
 .consent .btn.ghost{padding-inline:4px}
 .portrait.is-photo{aspect-ratio:600/733;border-radius:12px}.portrait.is-photo img{transform:none;object-position:50% 20%}.schedule-table.is-compact{min-width:0}.schedule-section .note{margin-top:14px;color:var(--ink-2)}@media(max-width:560px){.schedule-table th,.schedule-table td{min-width:0;padding-right:10px;font-size:.88rem}}
+/* Embedded inside 3D world modal: hide duplicate chrome so content feels native */
+html.is-embed .top,html.is-embed .site-footer,html.is-embed .consent,html.is-embed .skip{display:none!important}
+html.is-embed .pagehead{padding-top:clamp(24px,4vh,44px)}
+html.is-embed .cinematic-hero{min-height:auto;padding:32px 0 16px}
+html.is-embed .hero-layout{padding-block:16px 32px}
+html.is-embed main{padding-bottom:36px}

@@ -35,6 +35,7 @@ export class Player
         // this.setBackWheel()
         this.setFlip()
         this.setTimePlayed()
+        this.setPositionPersistence()
 
         this.game.physicalVehicle.chassis.physical.initialState.position.x = respawn.position.x
         this.game.physicalVehicle.chassis.physical.initialState.position.y = respawn.position.y
@@ -50,6 +51,34 @@ export class Player
         {
             this.updatePostPhysics()
         }, 6)
+    }
+
+    setPositionPersistence()
+    {
+        this._lastSavedAt = 0
+        this.savePosition = () =>
+        {
+            if(!this.position || !Number.isFinite(this.position.x) || !Number.isFinite(this.position.z))
+                return
+            try
+            {
+                localStorage.setItem('onur-3d-state', JSON.stringify({
+                    x: Number(this.position.x.toFixed(2)),
+                    z: Number(this.position.z.toFixed(2)),
+                    rotation: Number((this.rotationY || 0).toFixed(3)),
+                    t: Date.now()
+                }))
+            }
+            catch {}
+        }
+
+        window.addEventListener('pagehide', () => this.savePosition())
+        window.addEventListener('beforeunload', () => this.savePosition())
+        setInterval(() =>
+        {
+            if(this.game.inputs.filters.has('wandering') || this.game.inputs.filters.has('cinematic'))
+                this.savePosition()
+        }, 1500)
     }
 
     setSounds()

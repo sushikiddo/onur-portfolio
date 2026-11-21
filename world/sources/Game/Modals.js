@@ -21,6 +21,7 @@ export class Modals
 
         this.setClose()
         this.setItems()
+        this.setPageViewer()
         this.preopen()
         
         this.element.addEventListener('transitionend', () =>
@@ -186,6 +187,133 @@ export class Modals
         this.current.isOpen = false
         this.events.trigger('close')
         this.current.events.trigger('close')
+    }
+
+    setPageViewer()
+    {
+        const item = this.items.get('page')
+        if(!item)
+            return
+
+        this.pageViewer = {
+            item,
+            title: item.element.querySelector('.js-page-title'),
+            themeBtn: item.element.querySelector('.js-page-theme'),
+            external: item.element.querySelector('.js-page-external'),
+            frame: item.element.querySelector('.js-page-frame')
+        }
+
+        const themeKey = 'portfolio-theme-v2'
+        let currentTheme = 'dark'
+        try { if(localStorage.getItem(themeKey) === 'light') currentTheme = 'light' } catch {}
+
+        const applyPageTheme = (theme, save) =>
+        {
+            currentTheme = theme === 'light' ? 'light' : 'dark'
+            if(save) { try { localStorage.setItem(themeKey, currentTheme) } catch {} }
+            item.element.classList.toggle('is-light', currentTheme === 'light')
+            if(this.pageViewer.themeBtn)
+            {
+                const dark = currentTheme === 'dark'
+                this.pageViewer.themeBtn.textContent = dark ? '☾' : '☀︎'
+                this.pageViewer.themeBtn.setAttribute('aria-pressed', String(dark))
+                this.pageViewer.themeBtn.title = dark ? 'Açık temaya geç' : 'Koyu temaya geç'
+            }
+            try
+            {
+                this.pageViewer.frame?.contentWindow?.postMessage({ type: 'set-site-theme', theme: currentTheme }, window.location.origin)
+            }
+            catch {}
+        }
+        applyPageTheme(currentTheme, false)
+
+        if(this.pageViewer.themeBtn)
+        {
+            this.pageViewer.themeBtn.addEventListener('click', () =>
+            {
+                applyPageTheme(currentTheme === 'dark' ? 'light' : 'dark', true)
+            })
+        }
+        window.addEventListener('storage', (event) =>
+        {
+            if(event.key === themeKey)
+                applyPageTheme(event.newValue === 'light' ? 'light' : 'dark', false)
+        })
+
+        if(this.pageViewer.external)
+        {
+            this.pageViewer.external.addEventListener('click', () =>
+            {
+                this.game.player?.savePosition?.()
+            })
+        }
+
+        item.events.on('closed', () =>
+        {
+            if(this.pageViewer.frame)
+                this.pageViewer.frame.src = 'about:blank'
+        })
+
+        window.addEventListener('message', (event) =>
+        {
+            if(event.origin !== window.location.origin)
+                return
+            if(event.data && event.data.type === 'close-site-modal')
+                this.close()
+        })
+
+        // Intercept internal links in the quick-nav bar and 3D menu so visitors stay inside the 3D world
+        const bindLinks = (selector) =>
+        {
+            document.querySelectorAll(selector).forEach((link) =>
+            {
+                link.addEventListener('click', (event) =>
+                {
+                    if(event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+                        return
+                    const href = link.getAttribute('href')
+                    if(!href || !href.startsWith('/'))
+                        return
+                    event.preventDefault()
+                    this.openPage(href, link.dataset.pageTitle || link.textContent.trim())
+                })
+            })
+        }
+        bindLinks('.classic-links a')
+        bindLinks('.js-menu .content a[href^="/"]')
+    }
+
+    openPage(url, title = '')
+    {
+        if(!url)
+            return
+
+        if(!url.startsWith('/'))
+        {
+            if(url.startsWith('mailto:') || url.startsWith('tel:'))
+                window.location.href = url
+            else
+                window.open(url, '_blank', 'noopener')
+            return
+        }
+
+        if(!this.pageViewer)
+        {
+            window.open(url, '_blank')
+            return
+        }
+
+        const parsed = new URL(url, window.location.origin)
+        parsed.searchParams.set('embed', '1')
+
+        if(this.pageViewer.title)
+            this.pageViewer.title.textContent = title || 'Onur Can Orhan'
+        if(this.pageViewer.external)
+            this.pageViewer.external.href = url
+        if(this.pageViewer.frame)
+            this.pageViewer.frame.src = parsed.pathname + parsed.search + parsed.hash
+
+        this.open('page')
     }
 
     preopen()

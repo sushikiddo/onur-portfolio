@@ -45,7 +45,8 @@ export class Reveal
 
     updateStep(step)
     {
-        const speedMultiplier = location.hash.match(/skip/i) ? 4 : 1
+        const isResuming = this.game.respawns.hasSavedState()
+        const speedMultiplier = (location.hash.match(/skip/i) || isResuming) ? 4 : 1
 
         // Step 0
         if(step === 0)
@@ -97,7 +98,7 @@ export class Reveal
                     this.game.world.cherryTrees.leaves.seeThroughMultiplier = 0.5
 
                 // Click
-                if(location.hash.match(/skip/i))
+                if(location.hash.match(/skip/i) || isResuming)
                 {
                     this.updateStep(1)
                 }

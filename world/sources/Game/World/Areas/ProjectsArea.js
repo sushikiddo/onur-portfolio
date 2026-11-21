@@ -1039,7 +1039,7 @@ export class ProjectsArea extends Area
         {
             if(this.navigation.current.url)
             {
-                window.open(this.navigation.current.url, '_blank')
+                this.game.modals.openPage(this.navigation.current.url, this.navigation.current.title)
             }
         }
     }

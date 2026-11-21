@@ -306,10 +306,8 @@ export class SocialArea extends Area
                 InteractivePoints.STATE_CONCEALED,
                 () =>
                 {
-                    if(link.url && link.sameTab)
-                        window.location.href = link.url
-                    else if(link.url)
-                        window.open(link.url, '_blank')
+                    if(link.url)
+                        this.game.modals.openPage(link.url, link.name)
                     else if(link.modal)
                         this.game.modals.open(link.modal)
                 },
