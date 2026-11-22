@@ -3,6 +3,7 @@ import { Game } from './Game.js'
 import { color, distance, float, Fn, max, min, mix, mul, normalWorld, positionWorld, step, texture, uniform, uv, vec2, vec3, vec4 } from 'three/tsl'
 import gsap from 'gsap'
 import { Inputs } from './Inputs/Inputs.js'
+import { translateLabel } from './i18n.js'
 
 export class InteractivePoints
 {
@@ -41,6 +42,16 @@ export class InteractivePoints
         {
             this.update()
         }, 9)
+
+        window.addEventListener('world-lang-change', (event) =>
+        {
+            const lang = event.detail || document.documentElement.lang
+            for(const item of this.items)
+            {
+                if(item.redrawLabel)
+                    item.redrawLabel(lang)
+            }
+        })
     }
 
     setSounds()
@@ -215,42 +226,41 @@ export class InteractivePoints
         const textOffsetVertical = 2
         const font = `700 ${height}px "Amatic SC"`
 
-        const canvas = document.createElement('canvas')
-        canvas.style.position = 'fixed'
-        canvas.style.zIndex = 999
-        canvas.style.top = 0
-        canvas.style.left = 0
-        // document.body.append(canvas)
+        const createLabelTexture = (displayText) =>
+        {
+            const canvas = document.createElement('canvas')
+            const context = canvas.getContext('2d')
+            context.font = font
+            const textSize = context.measureText(displayText)
+            const w = Math.ceil(textSize.width) + textPaddingLeft + textPaddingRight + 2
+            canvas.width = w
+            canvas.height = height
+            context.fillStyle = '#000000'
+            context.fillRect(0, 0, w, height)
+            context.font = font
+            context.fillStyle = '#ffffff'
+            context.textAlign = 'start'
+            context.textBaseline = 'middle'
+            context.fillText(displayText, textPaddingLeft + 1, height * 0.5 + textOffsetVertical)
 
-        const context = canvas.getContext('2d')
-        context.font = font
+            const tex = new THREE.Texture(canvas)
+            tex.minFilter = THREE.NearestFilter
+            tex.magFilter = THREE.NearestFilter
+            tex.generateMipmaps = false
+            tex.needsUpdate = true
 
-        const textSize = context.measureText(text)
-        const width = Math.ceil(textSize.width) + textPaddingLeft + textPaddingRight + 2
-        canvas.width = width
-        canvas.height = height
+            return { tex, width: w }
+        }
 
-        context.fillStyle = '#000000'
-        context.fillRect(0, 0, width, height)
-
-        context.font = font
-        context.fillStyle = '#ffffff'
-        context.textAlign = 'start'
-        context.textBaseline = 'middle'
-        context.fillText(text, textPaddingLeft + 1, height * 0.5 + textOffsetVertical)
-
-        const labelTexture = new THREE.Texture(canvas)
-        labelTexture.minFilter = THREE.NearestFilter
-        labelTexture.magFilter = THREE.NearestFilter
-        labelTexture.generateMipmaps = false
-
-        labelTexture.needsUpdate = true
+        let currentLabel = createLabelTexture(translateLabel(text))
+        const width = currentLabel.width
 
         // Material
         const labelMaterial = new THREE.MeshLambertNodeMaterial({ transparent: true, depthTest: true })
         materials.push(labelMaterial)
 
         const labelOffset = uniform(1)
+        let labelTextureNode = null
         labelMaterial.outputNode = Fn(() =>
         {
             // const _uv = uv().add(vec2(labelOffset, 0))
@@ -259,7 +269,8 @@ export class InteractivePoints
                 uv().y
             )
 
-            const text = texture(labelTexture, _uv).r
+            labelTextureNode = texture(currentLabel.tex, _uv)
+            const text = labelTextureNode.r
             
             // Discard
             _uv.x.greaterThan(1).discard()
@@ -341,6 +352,17 @@ export class InteractivePoints
         item.state = this.temporaryHidden ? InteractivePoints.STATE_HIDDEN : state
         item.recoveryState = state
         item.materials = materials
+        item.originalText = text
+        item.redrawLabel = (lang) =>
+        {
+            const next = createLabelTexture(translateLabel(item.originalText, lang))
+            if(labelTextureNode)
+                labelTextureNode.value = next.tex
+            currentLabel.tex.dispose()
+            currentLabel = next
+            label.scale.x = 0.75 * next.width / height
+            label.position.x = align === InteractivePoints.ALIGN_LEFT ? 0 : - label.scale.x
+        }
         this.items.push(item)
 
         /**

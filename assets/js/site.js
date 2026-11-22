@@ -72,15 +72,32 @@
   document.querySelector('[data-contact-form]')?.addEventListener('submit', async event => {
     event.preventDefault();
     const form=event.currentTarget, button=form.querySelector('button[type="submit"]'), status=document.querySelector('#form-status');
-    // Sunucuya veri gönderilmez: ziyaretçinin e-posta uygulaması hazır mesajla açılır.
     const data=Object.fromEntries(new FormData(form));
     if(data.website)return; // bot tuzağı
-    const to=(document.querySelector('[data-contact-link="email"] [data-field]')?.textContent||'').trim();
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)){status.textContent=english?'Email address is unavailable.':'E-posta adresi bulunamadı.';return;}
-    const clean=v=>String(v||'').replace(/[\r\n]+/g,' ').trim();
-    const body=(english?'Name: ':'Ad soyad: ')+clean(data.name)+'\n'+(english?'Email: ':'E-posta: ')+clean(data.email)+'\n\n'+String(data.message||'').trim();
-    location.href='mailto:'+to+'?subject='+encodeURIComponent(clean(data.subject))+'&body='+encodeURIComponent(body);
-    status.textContent=english?'Your email app is opening with the message ready. Press send there to finish.':'E-posta uygulaman mesaj hazır şekilde açılıyor. Göndermek için oradaki Gönder düğmesine bas.';
+    const fallbackMailto=()=>{
+      const to=(document.querySelector('[data-contact-link="email"] [data-field]')?.textContent||'').trim();
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)){status.textContent=english?'Email address is unavailable.':'E-posta adresi bulunamadı.';return;}
+      const clean=v=>String(v||'').replace(/[\r\n]+/g,' ').trim();
+      const body=(english?'Name: ':'Ad soyad: ')+clean(data.name)+'\n'+(english?'Email: ':'E-posta: ')+clean(data.email)+'\n\n'+String(data.message||'').trim();
+      location.href='mailto:'+to+'?subject='+encodeURIComponent(clean(data.subject))+'&body='+encodeURIComponent(body);
+      status.textContent=english?'Your email app is opening with the message ready. Press send there to finish.':'E-posta uygulaman mesaj hazır şekilde açılıyor. Göndermek için oradaki Gönder düğmesine bas.';
+    };
+    if(location.protocol==='file:'){fallbackMailto();return;}
+    if(button)button.disabled=true;
+    status.textContent=english?'Sending message…':'Mesaj gönderiliyor…';
+    try{
+      const r=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+      const ct=r.headers.get('content-type')||'';
+      if(!ct.includes('application/json')){fallbackMailto();return;}
+      const j=await r.json();
+      if(!r.ok){status.textContent=j.error||(english?'Could not send message.':'Mesaj gönderilemedi.');return;}
+      form.reset();
+      status.textContent=english?'Message sent! Thank you, I will reply soon.':'Mesajın iletildi! Teşekkürler, en kısa sürede dönüş yapacağım.';
+    }catch{
+      fallbackMailto();
+    }finally{
+      if(button)button.disabled=false;
+    }
   });
   document.querySelectorAll('.bio-copy').forEach(copy => {
     const paragraphs = copy.textContent.split(/\n\s*\n/).filter(text => text.trim());

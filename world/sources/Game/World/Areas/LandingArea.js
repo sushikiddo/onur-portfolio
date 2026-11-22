@@ -117,6 +117,13 @@ export class LandingArea extends Area
                 reference.geometry = buildGeometry(character, reference.geometry)
                 reference.position.copy(position)
                 reference.userData.object.physical.body.setTranslation(position, true)
+                if(reference.userData.object.physical.initialState?.position)
+                {
+                    reference.userData.object.physical.initialState.position.x = position.x
+                    reference.userData.object.physical.initialState.position.y = position.y
+                    reference.userData.object.physical.initialState.position.z = position.z
+                    reference.userData.object.physical.initialState.sleeping = true
+                }
             }
             else
             {

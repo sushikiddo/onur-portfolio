@@ -55,6 +55,8 @@ export class ProjectsArea extends Area
         this.setAchievement()
 
         this.changeProject(0, ProjectsArea.DIRECTION_NEXT, false, true)
+        this.syncLiveProjects()
+        window.addEventListener('world-lang-change', () => this.syncLiveProjects())
 
         // Debug
         if(this.game.debug.active)
@@ -62,6 +64,44 @@ export class ProjectsArea extends Area
             this.debugPanel.addButton({ title: 'open', label: 'open' }).on('click', () => { this.open() })
             this.debugPanel.addButton({ title: 'close', label: 'close' }).on('click', () => { this.close() })
         }
+    }
+
+    async syncLiveProjects()
+    {
+        try
+        {
+            const response = await fetch('/api/world-projects', { cache: 'no-store' })
+            if(!response.ok)
+                return
+            const data = await response.json()
+            if(!data || !Array.isArray(data.projects) || !data.projects.length)
+                return
+
+            const lang = document.documentElement.lang === 'en' ? 'en' : 'tr'
+            const synced = data.projects.map((p) =>
+            {
+                const title = (lang === 'en' ? p.title_en : p.title_tr) || p.title_tr || `Proje ${p.id}`
+                const words = title.split(/\s+/).filter(Boolean)
+                const titleSmall = words.length > 1 ? [ words[0], words.slice(1).join(' ') ] : [ title ]
+                const techRaw = (lang === 'en' ? p.tech_en : p.tech_tr) || (lang === 'en' ? p.category_en : p.category_tr) || 'Web'
+                const techList = techRaw.split(/[,·]/).map(s => s.trim()).filter(Boolean).slice(0, 2)
+                return {
+                    title,
+                    titleSmall,
+                    url: p.url || '/projeler.html',
+                    attributes: {
+                        role: lang === 'en' ? 'Developer' : 'Geliştirici',
+                        with: techList.length > 1 ? techList : (techList[0] || 'Web')
+                    },
+                    distinctions: [],
+                    images: [ p.image || 'portfolio.jpg' ]
+                }
+            })
+
+            projectsData.splice(0, projectsData.length, ...synced)
+            this.changeProject(Math.min(this.navigation.index, projectsData.length - 1), ProjectsArea.DIRECTION_NEXT, false, true)
+        }
+        catch {}
     }
 
     setSounds()
@@ -468,7 +508,7 @@ export class ProjectsArea extends Area
         // Get resource and load
         this.images.getResourceAndLoad = (key) =>
         {
-            const path = `projects/images/${key}`
+            const path = /^(?:https?:\/\/|\/)/.test(key) ? key : `projects/images/${key}`
             
             // Try to retrieve resource
             let resource = this.images.resources.get(key)

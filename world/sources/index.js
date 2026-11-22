@@ -1,6 +1,9 @@
 import './threejs-override.js'
 import { Game } from './Game/Game.js'
+import { initWorldI18n } from './Game/i18n.js'
 import consoleLog from './data/consoleLog.js'
+
+initWorldI18n()
 
 if(import.meta.env.VITE_LOG)
     console.log(

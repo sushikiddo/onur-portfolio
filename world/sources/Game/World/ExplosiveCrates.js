@@ -129,8 +129,9 @@ export class ExplosiveCrates
 
         this.sounds.triggerClick.play(crate.reference.position)
 
-        gsap.delayedCall(0.4, () =>
+        crate.explodeTimer = gsap.delayedCall(0.4, () =>
         {
+            crate.explodeTimer = null
             // Sound
             this.sounds.explosions[Math.floor(Math.random() * this.sounds.explosions.length)].play(crate.reference.position)
 
@@ -147,44 +148,38 @@ export class ExplosiveCrates
         })
     }
 
-    reset()
+    cancelPending()
     {
         for(const crate of this.items)
         {
-            this.game.objects.resetObject(crate.object)
+            if(crate.explodeTimer)
+            {
+                crate.explodeTimer.kill()
+                crate.explodeTimer = null
+            }
+        }
+    }
+
+    reset()
+    {
+        this.cancelPending()
+
+        for(const crate of this.items)
+        {
             crate.exploded = false
+            this.game.objects.resetObject(crate.object, true)
 
             this.game.ticker.wait(2, () =>
             {
                 crate.object.physical.body.setEnabled(true)
+                crate.object.physical.body.sleep()
+                crate.object.visual.object3D.position.copy(crate.object.physical.initialState.position)
+                crate.object.visual.object3D.quaternion.copy(crate.object.physical.initialState.rotation)
+                crate.object.visual.object3D.needsUpdate = true
+                this.instancedGroup.needsUpdate = true
             })
         }
         
         this.instancedGroup.needsUpdate = true
-
-        // Disable every other object to prevent explosion trigger
-        this.game.objects.list.forEach((object) =>
-        {
-            // console.log(this.game.objects)
-            if(
-                object.physical &&
-                (object.physical.type === 'dynamic' || object.physical.type === 'kinematicPositionBased') &&
-                object.physical.body.isEnabled()
-            )
-            {
-                object.physical.body.setEnabled(false)
-
-                // Wait a second and reactivate
-                this.game.ticker.wait(1, () =>
-                {
-                    object.physical.body.setEnabled(true)
-
-                    // Sleep
-                    if(object.physical.initialState.sleeping)
-                        object.physical.body.sleep()
-
-                })
-            }
-        })
     }
 }

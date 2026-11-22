@@ -226,18 +226,18 @@ export class Objects
         return this.add(...this.getFromModel(_model, _visualDescription, _physicalDescription))
     }
 
-    resetObject(object)
+    resetObject(object, forceEnable = false)
     {
         if(
             !object.physical ||
             (object.physical.type !== 'dynamic' && object.physical.type !== 'kinematicPositionBased') ||
-            object.reseting
+            (object.reseting && !forceEnable)
         )
             return
 
         object.reseting = true
 
-        const isEnabled = object.physical.body.isEnabled()
+        const isEnabled = forceEnable ? true : object.physical.body.isEnabled()
         object.physical.body.setEnabled(false)
         object.physical.body.setTranslation(object.physical.initialState.position, false)
         object.physical.body.setRotation(object.physical.initialState.rotation, false)
@@ -273,8 +273,11 @@ export class Objects
 
     resetAll()
     {
+        const vehicleChassis = this.game.physicalVehicle?.chassis
         this.list.forEach((object) =>
         {
+            if(object === vehicleChassis)
+                return
             this.resetObject(object)
         })
     }

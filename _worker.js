@@ -589,6 +589,229 @@ async function exportZip(_request, env) {
 }
 __name(exportZip, "exportZip");
 
+// Online 3D world state (circuit leaderboard, whispers, cookies, cataclysm) & contact inbox in D1 state table
+function utcDayKey(now = Date.now()) {
+  const d = new Date(now);
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+}
+function utcDayStartMs(now = Date.now()) {
+  const d = new Date(now);
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+}
+function defaultWorldState() {
+  return { circuitDay: utcDayKey(), circuitLeaderboard: [], whispers: [], cookiesCount: 0, cataclysmCount: 0, cataclysmUntil: 0 };
+}
+async function readKvRow(env, id, fallbackFn) {
+  const db = dbFor(env);
+  let row = await db.prepare("SELECT id, value, revision FROM state WHERE id = ?").bind(id).first();
+  if (!row) {
+    const initial = fallbackFn();
+    await db.prepare("INSERT OR IGNORE INTO state (id, value, revision) VALUES (?, ?, 1)").bind(id, JSON.stringify(initial)).run();
+    row = await db.prepare("SELECT id, value, revision FROM state WHERE id = ?").bind(id).first();
+    if (!row) return { row: { id, revision: 1 }, value: initial };
+  }
+  try {
+    return { row, value: JSON.parse(row.value) };
+  } catch {
+    return { row, value: fallbackFn() };
+  }
+}
+async function writeKvRow(env, id, row, value) {
+  const serialized = JSON.stringify(value);
+  const res = await dbFor(env).prepare("UPDATE state SET value = ?, revision = revision + 1 WHERE id = ? AND revision = ?").bind(serialized, id, row.revision).run();
+  if (!res.success || res.meta?.changes !== 1) throw controlled("Concurrent update, retry", 409);
+}
+function normalizeWorldState(raw) {
+  const w = { ...defaultWorldState(), ...(raw && typeof raw === "object" ? raw : {}) };
+  const today = utcDayKey();
+  let changed = false;
+  if (w.circuitDay !== today) {
+    w.circuitDay = today;
+    w.circuitLeaderboard = [];
+    changed = true;
+  }
+  if (!Array.isArray(w.circuitLeaderboard)) w.circuitLeaderboard = [];
+  if (!Array.isArray(w.whispers)) w.whispers = [];
+  w.cookiesCount = Number.isFinite(w.cookiesCount) ? Math.max(0, Math.floor(w.cookiesCount)) : 0;
+  w.cataclysmCount = Number.isFinite(w.cataclysmCount) ? Math.max(0, Math.floor(w.cataclysmCount)) : 0;
+  w.cataclysmUntil = Number.isFinite(w.cataclysmUntil) ? w.cataclysmUntil : 0;
+  return { w, changed };
+}
+function worldInitPayload(w) {
+  const now = Date.now();
+  return {
+    type: "init",
+    circuitLeaderboard: w.circuitLeaderboard,
+    circuitResetTime: utcDayStartMs(now),
+    whispers: w.whispers,
+    cookiesCount: w.cookiesCount,
+    cataclysmCount: w.cataclysmCount,
+    cataclysmProgress: (w.cataclysmCount % 10) / 10,
+    cataclysmRunning: now < w.cataclysmUntil
+  };
+}
+async function getWorldState(_request, env) {
+  try {
+    const { row, value } = await readKvRow(env, "world", defaultWorldState);
+    const { w, changed } = normalizeWorldState(value);
+    if (changed) {
+      try { await writeKvRow(env, "world", row, w); } catch {}
+    }
+    return json2(worldInitPayload(w));
+  } catch (err2) {
+    return fail(err2);
+  }
+}
+async function postWorldAction(request, env) {
+  try {
+    const attempt = await limit(request, env, "world");
+    if (!attempt.allowed) return json2({ error: "Çok fazla istek, lütfen biraz bekle." }, 429);
+    const input = await request.json();
+    if (!input || typeof input !== "object" || Array.isArray(input)) throw controlled("Invalid payload");
+    const type = String(input.type || "");
+    const { row, value } = await readKvRow(env, "world", defaultWorldState);
+    const { w } = normalizeWorldState(value);
+    if (type === "circuitInsert") {
+      const tag = String(input.tag || "").toUpperCase().replace(/[^A-Z]/g, "").slice(0, 3);
+      const cc = String(input.countryCode || "").toLowerCase().replace(/[^a-z]/g, "").slice(0, 2);
+      const duration = Math.round(Number(input.duration));
+      if (tag.length !== 3 || !Number.isFinite(duration) || duration < 4000 || duration > 600000) throw controlled("Invalid circuit score");
+      w.circuitLeaderboard.push([tag, cc, duration]);
+      w.circuitLeaderboard.sort((a, b) => a[2] - b[2]);
+      w.circuitLeaderboard = w.circuitLeaderboard.slice(0, 10);
+      await writeKvRow(env, "world", row, w);
+      return json2({ type: "circuitUpdate", circuitLeaderboard: w.circuitLeaderboard });
+    }
+    if (type === "whispersInsert") {
+      const msg = String(input.message || "").replace(/[\r\n<>]+/g, " ").trim().slice(0, 30);
+      const cc = String(input.countryCode || "").toLowerCase().replace(/[^a-z]/g, "").slice(0, 2);
+      const id = String(input.uuid || crypto.randomUUID()).replace(/[^a-z0-9-]/gi, "").slice(0, 64) || crypto.randomUUID();
+      const x = Number(input.x), y = Number(input.y), z = Number(input.z);
+      if (!msg || !Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) throw controlled("Invalid whisper");
+      const item = { id, message: msg, countrycode: cc, x: Number(x.toFixed(2)), y: Number(y.toFixed(2)), z: Number(z.toFixed(2)) };
+      w.whispers = w.whispers.filter((old) => old.id !== id);
+      w.whispers.push(item);
+      if (w.whispers.length > 30) w.whispers = w.whispers.slice(-30);
+      await writeKvRow(env, "world", row, w);
+      return json2({ type: "whispersInsert", whispers: [item] });
+    }
+    if (type === "cookiesInsert") {
+      const amount = Math.round(Number(input.amount));
+      if (!Number.isFinite(amount) || amount < 1 || amount > 50) throw controlled("Invalid cookie amount");
+      w.cookiesCount += amount;
+      await writeKvRow(env, "world", row, w);
+      return json2({ type: "cookiesUpdate", cookiesCount: w.cookiesCount });
+    }
+    if (type === "cataclysmInsert") {
+      w.cataclysmCount += 1;
+      if (w.cataclysmCount % 10 === 0) w.cataclysmUntil = Date.now() + 60000;
+      await writeKvRow(env, "world", row, w);
+      return json2({
+        type: "cataclysmUpdate",
+        cataclysmCount: w.cataclysmCount,
+        cataclysmProgress: (w.cataclysmCount % 10) / 10,
+        cataclysmRunning: Date.now() < w.cataclysmUntil
+      });
+    }
+    throw controlled("Unknown world action");
+  } catch (err2) {
+    return fail(err2);
+  }
+}
+async function getWorldProjects(_request, env) {
+  try {
+    const { value } = await readState(env);
+    const model = deriveModel(value);
+    const projHtml = value.pages["projeler.html"] || "";
+    const out = model.projects.map((p) => {
+      const re = new RegExp(`<article\\b(?=[^>]*\\bdata-project-id="${p.id}")[^>]*>[\\s\\S]*?<\\/article>`, "i");
+      const block = projHtml.match(re)?.[0] || "";
+      const linkMatch = block.match(/<a\b[^>]*class="[^"]*project-open[^"]*"[^>]*href="([^"]+)"/i);
+      let url = linkMatch ? linkMatch[1] : "/projeler.html";
+      if (url && !url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("/")) url = "/" + url;
+      const img = model.images[`project-${p.id}`] || "";
+      return {
+        id: p.id,
+        title_tr: p.title_tr || `Proje ${p.id}`,
+        title_en: p.title_en || p.title_tr || `Project ${p.id}`,
+        category_tr: model.fields[`project-${p.id}-category-tr`] || "Proje",
+        category_en: model.fields[`project-${p.id}-category-en`] || "Project",
+        tech_tr: model.fields[`project-${p.id}-tech-tr`] || "",
+        tech_en: model.fields[`project-${p.id}-tech-en`] || "",
+        url,
+        image: img ? "/" + img.replace(/^\//, "") : ""
+      };
+    });
+    return json2({ projects: out });
+  } catch (err2) {
+    return fail(err2);
+  }
+}
+async function submitContact(request, env) {
+  try {
+    const attempt = await limit(request, env, "contact");
+    if (!attempt.allowed) return json2({ error: "Çok fazla mesaj gönderildi. Lütfen bir dakika bekle." }, 429);
+    const input = await request.json();
+    if (!input || typeof input !== "object" || Array.isArray(input)) throw controlled("Geçersiz istek");
+    if (String(input.website || "").trim()) return json2({ ok: true });
+    const name = String(input.name || "").replace(/[\r\n]+/g, " ").trim();
+    const email = String(input.email || "").trim();
+    const subject = String(input.subject || "").replace(/[\r\n]+/g, " ").trim();
+    const message = String(input.message || "").trim();
+    if (!name || name.length > 100) throw controlled("Ad soyad 1–100 karakter olmalı");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 160) throw controlled("Geçerli bir e-posta adresi girin");
+    if (!subject || subject.length > 150) throw controlled("Konu 1–150 karakter olmalı");
+    if (message.length < 10 || message.length > 5000) throw controlled("Mesaj 10–5000 karakter olmalı");
+    const { row, value } = await readKvRow(env, "messages", () => ({ items: [] }));
+    const items = Array.isArray(value?.items) ? value.items : [];
+    items.unshift({ id: crypto.randomUUID(), name, email, subject, message, createdAt: new Date().toISOString() });
+    if (items.length > 200) items.length = 200;
+    await writeKvRow(env, "messages", row, { items });
+    return json2({ ok: true });
+  } catch (err2) {
+    return fail(err2);
+  }
+}
+async function getAdminExtras(_request, env) {
+  try {
+    const { value: wRaw } = await readKvRow(env, "world", defaultWorldState);
+    const { w } = normalizeWorldState(wRaw);
+    const { value: mRaw } = await readKvRow(env, "messages", () => ({ items: [] }));
+    const messages = Array.isArray(mRaw?.items) ? mRaw.items : [];
+    return json2({ world: w, messages });
+  } catch (err2) {
+    return fail(err2);
+  }
+}
+async function moderateAdmin(request, env) {
+  try {
+    const input = await request.json();
+    if (!input || typeof input !== "object" || Array.isArray(input)) throw controlled("Invalid request");
+    if (input.action === "deleteMessage") {
+      const { row, value } = await readKvRow(env, "messages", () => ({ items: [] }));
+      const items = (Array.isArray(value?.items) ? value.items : []).filter((m) => m.id !== input.id);
+      await writeKvRow(env, "messages", row, { items });
+      return json2({ ok: true, messages: items });
+    }
+    const { row, value } = await readKvRow(env, "world", defaultWorldState);
+    const { w } = normalizeWorldState(value);
+    if (input.action === "deleteWhisper") {
+      w.whispers = w.whispers.filter((item) => item.id !== input.id);
+    } else if (input.action === "deleteScore") {
+      const idx = Number(input.index);
+      if (Number.isInteger(idx) && idx >= 0 && idx < w.circuitLeaderboard.length) w.circuitLeaderboard.splice(idx, 1);
+    } else if (input.action === "clearLeaderboard") {
+      w.circuitLeaderboard = [];
+    } else {
+      throw controlled("Unknown moderation action");
+    }
+    await writeKvRow(env, "world", row, w);
+    return json2({ ok: true, world: w });
+  } catch (err2) {
+    return fail(err2);
+  }
+}
+
 // worker.mjs
 var publicAdmin = /* @__PURE__ */ new Set(["/admin/login", "/admin/login.html", "/admin/login.js", "/admin/admin.css"]);
 var privateAdmin = /* @__PURE__ */ new Set(["/admin/", "/admin/index.html", "/admin/admin.js", "/admin/project-tools.js", "/admin/session.js"]);
@@ -650,23 +873,29 @@ async function dispatch(request, env) {
   const method = request.method.toUpperCase();
   if (method === "POST") {
     if (request.headers.get("Origin") !== url.origin) return json3({ error: "Ge\xE7ersiz istek kayna\u011F\u0131" }, 403);
-    const limits = { "/api/login": 4096, "/api/logout": 4096, "/api/password": 4096, "/api/save": 2e6, "/api/projects": 2e4, "/api/image": 6 * 1024 * 1024 };
+    const limits = { "/api/login": 4096, "/api/logout": 4096, "/api/password": 4096, "/api/save": 2e6, "/api/projects": 2e4, "/api/image": 6 * 1024 * 1024, "/api/world": 4096, "/api/contact": 16384, "/api/admin/moderate": 4096 };
     if (!(path in limits)) return json3({ error: "Not found" }, 404);
     request = await bounded(request, limits[path]);
     if (path === "/api/login") return login(request, env);
+    if (path === "/api/world") return postWorldAction(request, env);
+    if (path === "/api/contact") return submitContact(request, env);
     if (!await isAuthenticated(request, env)) return json3({ error: "Oturum a\xE7\u0131n" }, 401);
     if (path === "/api/logout") return logout(request, env);
     if (path === "/api/password") return changePassword(request, env);
     if (path === "/api/save") return saveFields(request, env);
     if (path === "/api/projects") return changeProject(request, env);
     if (path === "/api/image") return uploadImage(request, env);
+    if (path === "/api/admin/moderate") return moderateAdmin(request, env);
   }
   if (method !== "GET" && method !== "HEAD") return new Response("Method not allowed", { status: 405, headers: { Allow: "GET, HEAD, POST" } });
   if (path.startsWith("/api/")) {
-    if (!await isAuthenticated(request, env)) return json3({ error: "Oturum a\xE7\u0131n" }, 401);
     if (method === "HEAD") return new Response(null, { status: 405 });
+    if (path === "/api/world") return getWorldState(request, env);
+    if (path === "/api/world-projects") return getWorldProjects(request, env);
+    if (!await isAuthenticated(request, env)) return json3({ error: "Oturum a\xE7\u0131n" }, 401);
     if (path === "/api/data") return getModel(request, env);
     if (path === "/api/export") return exportZip(request, env);
+    if (path === "/api/admin/extras") return getAdminExtras(request, env);
     return json3({ error: "Not found" }, 404);
   }
   if (path === "/admin") return new Response(null, { status: 303, headers: { Location: "/admin/" } });

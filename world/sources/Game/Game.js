@@ -222,9 +222,15 @@ export class Game
         // Interactive buttons
         this.inputs.interactiveButtons.clearItems()
 
-        // Player respawn
-        this.player.respawn(null, () =>
+        // Player respawn back to start
+        this.player.respawn('landing', () =>
         {
+            this.view.focusPoint.isTracking = true
+
+            // Cancel any pending explosions before resetting objects
+            if(this.world.explosiveCrates?.cancelPending)
+                this.world.explosiveCrates.cancelPending()
+
             // Objects reset
             this.objects.resetAll()
 
@@ -236,9 +242,29 @@ export class Game
             if(this.world.areas.bowling)
                 this.world.areas.bowling.restart()
 
-            // Cookie
-            if(this.world.areas.cookie)
-                this.world.areas.cookie.cookies.instancedGroup.needsUpdate = true
+            const syncInstanced = () =>
+            {
+                if(this.world.areas.cookie)
+                    this.world.areas.cookie.cookies.instancedGroup.needsUpdate = true
+
+                if(this.world.areas.social)
+                    this.world.areas.social.fans.instancedGroup.needsUpdate = true
+
+                if(this.world.benches)
+                    this.world.benches.instancedGroup.needsUpdate = true
+
+                if(this.world.fences)
+                    this.world.fences.instancedGroup.needsUpdate = true
+
+                if(this.world.bricks)
+                    this.world.bricks.instancedGroup.needsUpdate = true
+
+                if(this.world.lanterns)
+                    this.world.lanterns.instancedGroup.needsUpdate = true
+
+                if(this.world.explosiveCrates)
+                    this.world.explosiveCrates.instancedGroup.needsUpdate = true
+            }
 
             // Toilet
             if(this.world.areas.toilet)
@@ -246,26 +272,10 @@ export class Game
 
             // Social
             if(this.world.areas.social)
-            {
                 this.world.areas.social.statue.down = false
-                this.world.areas.social.fans.instancedGroup.needsUpdate = true
-            }
-            
-            // Benches
-            if(this.world.benches)
-                this.world.benches.instancedGroup.needsUpdate = true
-            
-            // Fences
-            if(this.world.fences)
-                this.world.fences.instancedGroup.needsUpdate = true
-            
-            // Bricks
-            if(this.world.bricks)
-                this.world.bricks.instancedGroup.needsUpdate = true
-            
-            // Lanterns
-            if(this.world.lanterns)
-                this.world.lanterns.instancedGroup.needsUpdate = true
+
+            syncInstanced()
+            this.ticker.wait(3, syncInstanced)
 
             // Achievement
             gsap.delayedCall(2, () =>

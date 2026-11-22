@@ -26,17 +26,20 @@ export class Options
     {
         const element = this.element.querySelector('.js-quality-toggle')
         const text = element.querySelector('span')
-        text.textContent = this.game.quality.level === 0 ? 'Yüksek' : 'Düşük'
+        const updateText = () =>
+        {
+            const en = document.documentElement.lang === 'en'
+            text.textContent = this.game.quality.level === 0 ? (en ? 'High' : 'Yüksek') : (en ? 'Low' : 'Düşük')
+        }
+        updateText()
 
         element.addEventListener('click', () =>
         {
             this.game.quality.changeLevel(this.game.quality.level === 0 ? 1 : 0)
         })
 
-        this.game.quality.events.on('change', () =>
-        {
-            text.textContent = this.game.quality.level === 0 ? 'Yüksek' : 'Düşük'
-        })
+        this.game.quality.events.on('change', updateText)
+        window.addEventListener('world-lang-change', updateText)
     }
 
     setRespawn()
@@ -85,22 +88,25 @@ export class Options
         
         const update = (connected) =>
         {
+            const en = document.documentElement.lang === 'en'
             if(connected)
             {
                 element.classList.add('is-success')
                 element.classList.remove('is-danger')
                 
-                text.textContent = 'Çevrimiçi'
+                text.textContent = en ? 'Online' : 'Çevrimiçi'
 
-                tooltip.innerHTML = /* html */`<strong>Çok oyunculu</strong> özelliklerin keyfini çıkar`
+                tooltip.innerHTML = en
+                    ? /* html */`Enjoy <strong>multiplayer</strong> features`
+                    : /* html */`<strong>Çok oyunculu</strong> özelliklerin keyfini çıkar`
             }
             else
             {
                 element.classList.remove('is-success')
                 element.classList.add('is-danger')
-                text.textContent = 'Çevrimdışı'
+                text.textContent = en ? 'Offline' : 'Çevrimdışı'
 
-                tooltip.innerHTML = /* html */`Yakında geri gelir`
+                tooltip.innerHTML = en ? /* html */`Back soon` : /* html */`Yakında geri gelir`
             }
         }
 
@@ -113,6 +119,10 @@ export class Options
         this.game.server.events.on('disconnected', () =>
         {
             update(false)
+        })
+        window.addEventListener('world-lang-change', () =>
+        {
+            update(this.game.server.connected)
         })
     }
 }

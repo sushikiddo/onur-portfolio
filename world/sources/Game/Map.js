@@ -41,51 +41,101 @@ export class Map
     {
         this.locations = {}
         this.locations.items = [
-            { name: 'Başarımlar', respawnName: 'achievements', offset: { x: 0, y: -0.01 } },
-            { name: 'Sunak', respawnName: 'altar', offset: { x: 0, y: -0.05 } },
-            { name: 'Perde<br /> arkası', respawnName: 'behindTheScene', offset: { x: 0.01, y: 0 } },
-            { name: 'Bowling', respawnName: 'bowling', offset: { x: -0.08, y: 0.03 } },
-            { name: 'Kariyer', respawnName: 'career', offset: { x: 0, y: -0.06 } },
-            { name: 'Pist', respawnName: 'circuit', offset: { x: -0.08, y: -0.05 } },
-            { name: 'Çerez', respawnName: 'cookie', offset: { x: -0.02, y: -0.01 } },
-            { name: 'Lab', respawnName: 'lab', offset: { x: -0.03, y: 0 } },
-            { name: 'Başlangıç', respawnName: 'landing', offset: { x: 0.02, y: 0 } },
-            { name: 'Projeler', respawnName: 'projects', offset: { x: 0, y: -0.02 } },
-            { name: 'Sosyal', respawnName: 'social', offset: { x: -0.01, y: -0.04 } },
-            { name: 'Klasik site', respawnName: 'timeMachine', offset: { x: 0, y: 0 } },
+            { tr: 'Başarımlar', en: 'Achievements', respawnName: 'achievements', offset: { x: 0, y: -0.01 } },
+            { tr: 'Sunak', en: 'Altar', respawnName: 'altar', offset: { x: 0, y: -0.05 } },
+            { tr: 'Perde<br /> arkası', en: 'Behind the<br />scenes', respawnName: 'behindTheScene', offset: { x: 0.01, y: 0 } },
+            { tr: 'Bowling', en: 'Bowling', respawnName: 'bowling', offset: { x: -0.08, y: 0.03 } },
+            { tr: 'Kariyer', en: 'Career', respawnName: 'career', offset: { x: 0, y: -0.06 } },
+            { tr: 'Pist', en: 'Circuit', respawnName: 'circuit', offset: { x: -0.08, y: -0.05 } },
+            { tr: 'Çerez', en: 'Cookie', respawnName: 'cookie', offset: { x: -0.02, y: -0.01 } },
+            { tr: 'Lab', en: 'Lab', respawnName: 'lab', offset: { x: -0.03, y: 0 } },
+            { tr: 'Başlangıç', en: 'Start', respawnName: 'landing', offset: { x: 0.02, y: 0 } },
+            { tr: 'Projeler', en: 'Projects', respawnName: 'projects', offset: { x: 0, y: -0.02 } },
+            { tr: 'Sosyal', en: 'Social', respawnName: 'social', offset: { x: -0.01, y: -0.04 } },
+            { tr: 'Klasik site', en: 'Classic site', respawnName: 'timeMachine', offset: { x: 0, y: 0 } },
         ]
 
+        const hint = document.createElement('div')
+        hint.className = 'js-map-hint map-teleport-hint'
+        this.element.append(hint)
+
+        const teleportTo = (respawnName) =>
+        {
+            this.game.player.respawn(respawnName, () =>
+            {
+                this.game.view.focusPoint.isTracking = true
+                this.game.player?.savePosition?.()
+            })
+            this.game.modals.close()
+        }
+
+        const pinElements = []
         for(const item of this.locations.items)
         {
             const respawn = this.game.respawns.getByName(item.respawnName)
             const mapPosition = this.worldToMap(respawn.position)
 
-            // HTML
-            const html = /* html */`
-                <div class="pin"></div>
-                <div class="name-container">
-                    <div class="name">${item.name}</div>
-                </div>
-            `
-
             const element = document.createElement('div')
             element.classList.add('location')
-            element.innerHTML = html
+            element.setAttribute('role', 'button')
+            element.setAttribute('tabindex', '0')
+            element.innerHTML = /* html */`
+                <div class="pin"></div>
+                <div class="name-container">
+                    <div class="name"></div>
+                </div>
+            `
             element.style.left = `${(mapPosition.x + item.offset.x)* 100}%`
             element.style.top = `${(mapPosition.y + item.offset.y)* 100}%`
             element.style.zIndex = Math.round(mapPosition.y * 1000)
-            
-            this.element.append(element)
 
-            element.addEventListener('click', () =>
+            this.element.append(element)
+            pinElements.push({ item, element, nameEl: element.querySelector('.name') })
+
+            element.addEventListener('click', (event) =>
             {
-                this.game.player.respawn(item.respawnName, () =>
+                event.stopPropagation()
+                teleportTo(item.respawnName)
+            })
+            element.addEventListener('keydown', (event) =>
+            {
+                if(event.key === 'Enter' || event.key === ' ')
                 {
-                    this.game.view.focusPoint.isTracking = true
-                })
-                this.game.modals.close()
+                    event.preventDefault()
+                    teleportTo(item.respawnName)
+                }
             })
         }
+
+        const refreshLabels = (lang) =>
+        {
+            const isEn = (lang || document.documentElement.lang) === 'en'
+            hint.textContent = isEn ? 'Click any area on the map to teleport there' : 'Işınlanmak için haritada bir alana tıkla'
+            for(const p of pinElements)
+            {
+                const label = isEn ? p.item.en : p.item.tr
+                p.nameEl.innerHTML = label
+                p.element.setAttribute('title', (isEn ? 'Teleport: ' : 'Işınlan: ') + label.replace(/<br\s*\/?>/gi, ' '))
+            }
+        }
+        refreshLabels(document.documentElement.lang)
+        window.addEventListener('world-lang-change', (e) => refreshLabels(e.detail))
+
+        // Clicking anywhere on the map image teleports to the closest area
+        this.element.addEventListener('click', (event) =>
+        {
+            if(event.target.closest('.location'))
+                return
+            const rect = this.element.getBoundingClientRect()
+            if(!rect.width || !rect.height)
+                return
+            const mx = clamp((event.clientX - rect.left) / rect.width, 0, 1)
+            const my = clamp((event.clientY - rect.top) / rect.height, 0, 1)
+            const worldPos = { x: (mx - 0.5) * this.game.terrain.size, z: (my - 0.5) * this.game.terrain.size }
+            const closest = this.game.respawns.getClosest(worldPos)
+            if(closest)
+                teleportTo(closest.name)
+        })
     }
     
     setPlayer()
