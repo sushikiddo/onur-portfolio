@@ -1,6 +1,7 @@
 (() => {
   'use strict';
   const english = document.documentElement.lang === 'en';
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const controls = document.querySelector('.project-filters');
   const cards = [...document.querySelectorAll('.phantom-tiles .card')];
   if (!controls || !cards.length) return;
@@ -14,9 +15,22 @@
     button.type = 'button'; button.className = 'project-filter';
     button.dataset.filter = cat; button.textContent = cat; button.setAttribute('aria-pressed', 'false'); choices.append(button);
   }
-  function update() {
+  function update(animate = false) {
     let visible = 0;
-    for (const card of cards) { card.hidden = active !== null && category(card) !== active; if (!card.hidden) visible++; }
+    for (const card of cards) {
+      const hide = active !== null && category(card) !== active;
+      card.hidden = hide;
+      if (!hide) {
+        if (animate && !reduced) {
+          card.classList.remove('filter-enter');
+          card.classList.add('is-visible', 'is-in');
+          card.style.setProperty('--filter-delay', `${visible * 65}ms`);
+          void card.offsetWidth;
+          card.classList.add('filter-enter');
+        }
+        visible++;
+      }
+    }
     document.querySelector('.project-empty').hidden = visible !== 0;
     count.textContent = english ? `${visible} projects shown` : `${visible} proje gösteriliyor`;
     controls.querySelectorAll('button').forEach(button => {
@@ -27,8 +41,11 @@
   controls.addEventListener('click', event => {
     const button = event.target.closest('button[data-filter]');
     if (!button) return;
-    active = button.parentElement === controls ? null : button.dataset.filter; update();
-  }); update();
+    active = button.parentElement === controls ? null : button.dataset.filter;
+    update(true);
+  });
+  update(false);
+
   const dialog = document.createElement('dialog'); dialog.className = 'project-dialog';
   dialog.setAttribute('aria-labelledby', 'project-dialog-title'); dialog.setAttribute('aria-describedby', 'project-dialog-description');
   const shell = document.createElement('div'); shell.className = 'project-dialog-content';
@@ -64,21 +81,21 @@
       });
       links.replaceChildren(); const demo = card.querySelector('a.project-open'); if (demo) links.append(demo.cloneNode(true));
       gallery.replaceChildren();
-      const galleryTitle = document.createElement('h3');galleryTitle.className='project-gallery-heading';galleryTitle.textContent=english?'Project gallery':'Proje galerisi';gallery.append(galleryTitle);
-      const media = [...card.querySelectorAll('.project-gallery-source img')].filter(img=>!img.getAttribute('src').includes('comparison-placeholder.svg'));
-      if(media.length){const grid=document.createElement('div');grid.className='project-media-grid';media.forEach(img=>{const clone=img.cloneNode();clone.loading='eager';grid.append(clone)});gallery.append(grid)}
-      else{const note=document.createElement('p');note.className='note';note.textContent=english?'Additional project images have not been added yet.':'Ek proje görselleri henüz eklenmedi.';gallery.append(note)}
-      if(category(card).toLocaleLowerCase().includes('photoshop')){
-        const sourceComparison=document.querySelector('section [data-comparison]');
-        if(sourceComparison){
-          const heading=document.createElement('h3');heading.className='modal-compare-title';heading.textContent=english?'Before / after':'Önce / sonra';gallery.append(heading);
-          const note=document.createElement('p');note.dataset.comparisonNote='';note.className='note';note.textContent=sourceComparison.parentElement.querySelector('[data-comparison-note]').textContent;gallery.append(note);
-          const clone=sourceComparison.cloneNode(true);delete clone.dataset.compareInitialized;
-          clone.querySelector('input').id='modal-compare-range';clone.querySelector('input').setAttribute('aria-describedby','modal-compare-help');clone.querySelector('label').htmlFor='modal-compare-range';clone.querySelector('#compare-help').id='modal-compare-help';
-          gallery.append(clone);window.initPortfolioComparison?.(clone);
+      const galleryTitle = document.createElement('h3'); galleryTitle.className = 'project-gallery-heading'; galleryTitle.textContent = english ? 'Project gallery' : 'Proje galerisi'; gallery.append(galleryTitle);
+      const media = [...card.querySelectorAll('.project-gallery-source img')].filter(img => !img.getAttribute('src').includes('comparison-placeholder.svg'));
+      if (media.length) { const grid = document.createElement('div'); grid.className = 'project-media-grid'; media.forEach(img => { const clone = img.cloneNode(); clone.loading = 'eager'; grid.append(clone); }); gallery.append(grid); }
+      else { const note = document.createElement('p'); note.className = 'note'; note.textContent = english ? 'Additional project images have not been added yet.' : 'Ek proje görselleri henüz eklenmedi.'; gallery.append(note); }
+      if (category(card).toLocaleLowerCase().includes('photoshop')) {
+        const sourceComparison = document.querySelector('section [data-comparison]');
+        if (sourceComparison) {
+          const heading = document.createElement('h3'); heading.className = 'modal-compare-title'; heading.textContent = english ? 'Before / after' : 'Önce / sonra'; gallery.append(heading);
+          const note = document.createElement('p'); note.dataset.comparisonNote = ''; note.className = 'note'; note.textContent = sourceComparison.parentElement.querySelector('[data-comparison-note]').textContent; gallery.append(note);
+          const clone = sourceComparison.cloneNode(true); delete clone.dataset.compareInitialized;
+          clone.querySelector('input').id = 'modal-compare-range'; clone.querySelector('input').setAttribute('aria-describedby', 'modal-compare-help'); clone.querySelector('label').htmlFor = 'modal-compare-range'; clone.querySelector('#compare-help').id = 'modal-compare-help';
+          gallery.append(clone); window.initPortfolioComparison?.(clone);
         }
       }
-      dialog.showModal();dialog.scrollTop=0;closer.focus();
+      dialog.showModal(); dialog.scrollTop = 0; closer.focus();
     }); card.querySelector('.inner').append(button);
   }
 })();
@@ -86,8 +103,8 @@
 (() => {
   'use strict';
   const init = figure => {
-    if(figure.dataset.compareInitialized)return;
-    figure.dataset.compareInitialized='true';
+    if (figure.dataset.compareInitialized) return;
+    figure.dataset.compareInitialized = 'true';
     const english = document.documentElement.lang === 'en';
     const stage = figure.querySelector('.comparison-stage');
     const range = figure.querySelector('input[type="range"]');
@@ -104,7 +121,7 @@
     };
     stage.addEventListener('pointerdown', event => {
       if (event.button !== 0) return;
-      stage.setPointerCapture(event.pointerId); move(event); range.focus({preventScroll: true});
+      stage.setPointerCapture(event.pointerId); move(event); range.focus({ preventScroll: true });
     });
     stage.addEventListener('pointermove', event => { if (stage.hasPointerCapture(event.pointerId)) move(event); });
     stage.addEventListener('pointerup', event => { if (stage.hasPointerCapture(event.pointerId)) stage.releasePointerCapture(event.pointerId); });
@@ -120,6 +137,6 @@
     if (note && added === 2) note.textContent = english ? 'Comparison of the two uploaded images. See the caption for project context.' : 'Yüklenen iki görselin karşılaştırması. Proje bağlamı için açıklamayı okuyun.';
     else if (note && added === 1) note.textContent = english ? 'One original image has been added; the other is still a placeholder.' : 'Bir görsel eklendi; diğer görsel hâlâ yer tutucu.';
   };
-  window.initPortfolioComparison=init;
+  window.initPortfolioComparison = init;
   document.querySelectorAll('[data-comparison]').forEach(init);
 })();

@@ -1,25 +1,63 @@
-.command-launch{display:inline-grid;place-items:center;width:40px;height:40px;min-width:40px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--text);cursor:pointer;font:18px/1 Nunito,system-ui,sans-serif}
-.command-launch:hover{color:var(--accent);border-color:var(--accent)}
+.command-launch{
+  display:inline-grid;place-items:center;
+  width:40px;height:40px;min-width:40px;
+  border:1px solid var(--line);border-radius:999px;
+  background:rgba(var(--ink-rgb),.03);color:var(--ink);cursor:pointer;
+  font-family:var(--font-sans);font-size:16px;line-height:1;
+  transition-property:color,border-color,background-color,transform;
+  transition-duration:200ms;transition-timing-function:cubic-bezier(.16,1,.3,1);
+}
+.command-launch:hover{color:var(--accent);border-color:var(--accent);background:rgba(var(--accent-rgb),.08)}
+.command-launch:active{transform:scale(.94)}
 
-/* Palette: warm night to match the 3D world. */
-.command-dialog{--cp-bg:#211a17;--cp-ink:#f3ece6;--cp-muted:#b9aca3;--cp-line:rgba(243,236,230,.14);--cp-chip:#382b25;--cp-sel:#f2877d;--cp-sel-ink:#15110f;
+.command-dialog{
+  --cp-bg:#191a2a;--cp-ink:#f4f3f8;--cp-muted:#a5a7bc;--cp-line:rgba(244,243,248,.12);
+  --cp-chip:rgba(244,243,248,.08);--cp-sel:rgba(245,158,66,.16);--cp-sel-border:rgba(245,158,66,.45);--cp-sel-ink:#f4f3f8;
   width:min(580px,calc(100% - 32px));max-height:80svh;padding:0;margin:12svh auto auto;overflow:hidden;
   border:1px solid var(--cp-line);border-radius:20px;background:var(--cp-bg);color:var(--cp-ink);
-  box-shadow:0 0 40px rgba(239,122,60,.3),0 24px 60px -30px rgba(0,0,0,.8)}
-.command-dialog::backdrop{background:rgba(8,5,4,.7)}
-.command-search{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid var(--cp-line)}
-.command-search input{width:100%;background:none!important;color:var(--cp-ink)!important;outline:none;border:0!important;padding:8px 0!important;font:17px/1.4 Nunito,system-ui,sans-serif;box-shadow:none!important}
+  box-shadow:0 28px 72px -20px rgba(0,0,0,.78),0 0 0 1px rgba(245,158,66,.12);
+}
+.command-dialog::backdrop{
+  background:rgba(8,9,16,.72);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
+}
+.command-search{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--cp-line)}
+.command-search input{
+  width:100%;background:none!important;color:var(--cp-ink)!important;outline:none;border:0!important;
+  padding:8px 0!important;font:500 16px/1.4 var(--font-sans);box-shadow:none!important;
+}
 .command-search input::placeholder{color:var(--cp-muted)}
-.command-close{background:var(--cp-chip);color:var(--cp-ink);border:1px solid var(--cp-line);border-radius:6px;padding:7px 8px;font:11px/1 Nunito,system-ui,sans-serif;cursor:pointer}
-.command-results{padding:8px;max-height:50svh;overflow:auto;display:grid;gap:3px}
-.command-result{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;border:0;border-radius:9px;text-decoration:none;color:var(--cp-ink);background:none;text-align:left;font:14px/1.4 Nunito,system-ui,sans-serif;cursor:pointer}
-.command-result small{color:var(--cp-muted);font:11px/1.4 Nunito,system-ui,sans-serif}
-.command-result:hover,.command-result:focus-visible,.command-result.is-selected{color:var(--cp-sel-ink);background:var(--cp-sel);outline:0}
-.command-result:hover small,.command-result:focus-visible small,.command-result.is-selected small{color:var(--cp-sel-ink);opacity:.85}
-.command-hint{padding:12px 22px;margin:0;border-top:1px solid var(--cp-line);color:var(--cp-muted);font:11px/1.5 ui-monospace,Consolas,monospace}
-.command-empty{padding:25px;color:var(--cp-muted)}
-.command-dialog[open]{animation:command-in .2s ease-out}
-@keyframes command-in{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+.command-close{
+  background:var(--cp-chip);color:var(--cp-muted);border:1px solid var(--cp-line);
+  border-radius:7px;padding:7px 9px;font:600 11px/1 var(--font-mono);cursor:pointer;
+  transition-property:color,border-color;transition-duration:180ms;
+}
+.command-close:hover{color:var(--cp-ink);border-color:var(--accent)}
+.command-results{padding:8px;max-height:58svh;overflow:auto;display:grid;gap:3px}
+.command-result{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:11px 16px;border:1px solid transparent;border-radius:12px;
+  text-decoration:none;color:var(--cp-ink);background:none;text-align:left;
+  font:500 14.5px/1.4 var(--font-sans);cursor:pointer;
+  transition-property:background-color,border-color,color,transform;
+  transition-duration:180ms;transition-timing-function:cubic-bezier(.16,1,.3,1);
+}
+.command-result small{color:var(--cp-muted);font:600 11px/1.4 var(--font-mono)}
+.command-result:hover,.command-result:focus-visible,.command-result.is-selected{
+  color:var(--cp-sel-ink);background:var(--cp-sel);border-color:var(--cp-sel-border);
+  transform:translateX(3px);outline:0;
+}
+.command-result:hover small,.command-result:focus-visible small,.command-result.is-selected small{color:var(--accent)}
+.command-hint{padding:12px 20px;margin:0;border-top:1px solid var(--cp-line);color:var(--cp-muted);font:500 11.5px/1.5 var(--font-mono)}
+.command-empty{padding:24px;color:var(--cp-muted)}
+.command-dialog[open]{animation:command-in 260ms cubic-bezier(.16,1,.3,1) both}
+@keyframes command-in{from{opacity:0;transform:translateY(-12px) scale(.97)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.command-dialog[open]{animation:none}}
-html[data-theme=light] .command-dialog{--cp-bg:#ffffff;--cp-ink:#1d1815;--cp-muted:#5e544d;--cp-line:rgba(29,24,21,.14);--cp-chip:#efeeeb;--cp-sel:#c25a1f;--cp-sel-ink:#ffffff;box-shadow:0 24px 60px -30px rgba(29,24,21,.45)}
-html[data-theme=light] .command-dialog::backdrop{background:rgba(29,24,21,.45)}
+
+html[data-theme=light] .command-dialog{
+  --cp-bg:#ffffff;--cp-ink:#141522;--cp-muted:#56586b;--cp-line:rgba(20,21,34,.12);
+  --cp-chip:#f2efe9;--cp-sel:rgba(200,94,22,.11);--cp-sel-border:rgba(200,94,22,.35);--cp-sel-ink:#141522;
+  box-shadow:0 24px 60px -24px rgba(20,21,34,.38);
+}
+html[data-theme=light] .command-dialog::backdrop{background:rgba(16,18,28,.45)}

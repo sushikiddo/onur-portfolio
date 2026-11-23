@@ -1,6 +1,6 @@
-﻿/* Curtain is decorative only and never intercepts input. */
+﻿/* Modern Motion & Transition System — Compositor-only, interruptible, 60fps. */
+
 html{scroll-behavior:smooth}
-/* Lenis (inertial scroll) */
 html.lenis,html.lenis body{height:auto}
 .lenis.lenis-smooth{scroll-behavior:auto!important}
 .lenis.lenis-smooth [data-lenis-prevent]{overscroll-behavior:contain}
@@ -9,37 +9,148 @@ html.lenis,html.lenis body{height:auto}
 html.pf-lenis{scroll-behavior:auto}
 main,.site-footer{overflow-x:clip}
 
-/* Line-by-line text reveal (cinematic.js splits text into .split-line > span) */
+/* Top scroll progress hairline */
+.scroll-progress{
+  position:fixed;top:0;left:0;right:0;height:2.5px;z-index:200;
+  pointer-events:none;
+  transform-origin:0 50%;
+  transform:scaleX(0);
+  background:linear-gradient(90deg,var(--accent) 0%,var(--accent-2) 100%);
+  box-shadow:0 0 12px rgba(var(--accent-rgb),.65);
+  will-change:transform;
+}
+
+/* Line-by-line split headline reveal */
 html.split-pending :is(.pagehead h1,.pagehead .lead,.section-heading h2,.section-heading p,.home-intro .lead,.hero-copy h1,.hero-tagline,.bio-copy,.footer-signature,.notes-section blockquote p){visibility:hidden}
-.split-line{display:block;overflow:hidden;padding:0 .08em .14em;margin:0 -.08em -.14em}
-.split-line>span{display:block;transform:translateY(110%);transition:transform .6s cubic-bezier(.2,.7,.1,1);transition-delay:calc(var(--i,0)*40ms);will-change:transform}
-.split-ready.is-in .split-line>span{transform:none}
+.split-line{display:block;overflow:hidden;padding:0 .06em .14em;margin:0 -.06em -.14em}
+.split-line>span{
+  display:block;
+  opacity:0;
+  transform:translate3d(0,108%,0);
+  transition-property:transform,opacity;
+  transition-duration:720ms,520ms;
+  transition-timing-function:cubic-bezier(.16,1,.3,1),ease-out;
+  transition-delay:calc(var(--i,0)*55ms);
+  will-change:transform,opacity;
+}
+.split-ready.is-in .split-line>span{opacity:1;transform:none}
 .footer-signature .split-line{display:inline-block}
 
-/* Glowing thin ring: the same loading motif as the 3D world. */
-.glow-ring,.page-curtain::before{display:block;width:72px;height:72px;border-radius:50%;border:2px solid rgba(var(--accent-rgb),.22);border-top-color:var(--olive);border-right-color:var(--accent);box-shadow:0 0 26px rgba(var(--accent-rgb),.5),inset 0 0 18px rgba(var(--accent-rgb),.2);animation:ring-spin 1.1s linear infinite}
-@keyframes ring-spin{to{transform:rotate(360deg)}}
+/* Scroll-triggered staggered section & card reveals */
+@media(prefers-reduced-motion:no-preference){
+  .reveal-ready{
+    opacity:0;
+    transform:translate3d(0,22px,0) scale(.985);
+    transition-property:opacity,transform;
+    transition-duration:680ms;
+    transition-timing-function:cubic-bezier(.16,1,.3,1);
+    transition-delay:var(--reveal-delay,0ms);
+    will-change:opacity,transform;
+  }
+  .reveal-ready.is-visible{opacity:1;transform:none}
 
-/* Page transition: dark warm veil with the ring; decorative only, never intercepts input. */
-.page-curtain{position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:0;visibility:hidden;background:radial-gradient(ellipse at 50% 45%,var(--veil-a) 0%,var(--veil-b) 62%)}
-.page-curtain::before{content:"";position:absolute;left:50%;top:50%;margin:-36px 0 0 -36px}
-.page-curtain.curtain-enter{animation:curtain-reveal .45s ease both}
-.page-curtain.curtain-exit{animation:curtain-cover .3s ease both}
-@keyframes curtain-cover{from{opacity:0;visibility:visible}to{opacity:1;visibility:visible}}
-@keyframes curtain-reveal{from{opacity:1;visibility:visible}to{opacity:0;visibility:hidden}}
+  /* Media clip-path unveil + gentle initial zoom settle */
+  .media-reveal .visual,.media-reveal .image{
+    clip-path:inset(8% 0 0 0 round 12px);
+    transition-property:clip-path;
+    transition-duration:880ms;
+    transition-timing-function:cubic-bezier(.16,1,.3,1);
+    transition-delay:var(--reveal-delay,0ms);
+  }
+  .media-reveal.is-in .visual,.media-reveal.is-in .image{
+    clip-path:inset(0 round 0px);
+  }
+  .media-reveal:not(.is-in) .visual img{transform:scale(1.09)}
 
-/* Preloader (first home view per session): label left, count right, glowing ring centred; it fades out softly */
-.preloader{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at 50% 45%,var(--veil-a) 0%,var(--veil-b) 62%);color:var(--ink);display:flex;align-items:flex-end;justify-content:space-between;padding:28px clamp(20px,4vw,48px);font:700 12px/1 Nunito,system-ui,sans-serif;letter-spacing:.14em;pointer-events:none}
-.preloader-mark{position:absolute;left:50%;top:50%;width:72px;height:72px;margin:-36px 0 0 -36px;display:block;transition:transform .6s cubic-bezier(.4,0,.2,1),opacity .45s ease}
-.preloader-count{font-variant-numeric:tabular-nums}
-.preloader.is-leaving{opacity:0;transition:opacity .55s ease}
-.preloader.is-leaving .preloader-mark{transform:scale(2.4);opacity:0}
-.preloader-label,.preloader-count{transition:opacity .3s ease}
-.preloader.is-leaving .preloader-label,.preloader.is-leaving .preloader-count{opacity:0}
+  /* Project filter enter stagger */
+  .card.filter-enter{
+    animation:filter-pop 420ms cubic-bezier(.16,1,.3,1) var(--filter-delay,0ms) both;
+  }
+  @keyframes filter-pop{
+    from{opacity:0;transform:translate3d(0,14px,0) scale(.975)}
+    to{opacity:1;transform:none}
+  }
+
+  /* Page content glide entrance */
+  main.page-enter{
+    animation:page-glide-in 540ms cubic-bezier(.16,1,.3,1) both;
+  }
+  @keyframes page-glide-in{
+    from{opacity:0;transform:translate3d(0,14px,0);filter:blur(3px)}
+    to{opacity:1;transform:none;filter:blur(0)}
+  }
+}
+
+/* Architectural page transition curtain (vertical veil wipe with luminous edge) */
+.page-curtain{
+  position:fixed;inset:0;z-index:9998;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 40%,var(--veil-a) 0%,var(--veil-b) 72%);
+  transform:scaleY(0);
+  transform-origin:50% 100%;
+  will-change:transform;
+}
+.page-curtain::after{
+  content:'';
+  position:absolute;left:0;right:0;top:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),var(--accent-2),transparent);
+  opacity:.9;
+}
+.page-curtain.curtain-exit{
+  transform-origin:50% 100%;
+  animation:curtain-wipe-in 340ms cubic-bezier(.76,0,.24,1) forwards;
+}
+.page-curtain.curtain-enter{
+  transform-origin:50% 0%;
+  animation:curtain-wipe-out 480ms cubic-bezier(.76,0,.24,1) forwards;
+}
+@keyframes curtain-wipe-in{
+  from{transform:scaleY(0)}
+  to{transform:scaleY(1)}
+}
+@keyframes curtain-wipe-out{
+  from{transform:scaleY(1)}
+  to{transform:scaleY(0)}
+}
+
+/* Sleek session preloader (first home view only) */
+.preloader{
+  position:fixed;inset:0;z-index:9999;
+  background:radial-gradient(ellipse at 50% 42%,var(--veil-a) 0%,var(--veil-b) 72%);
+  color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+  padding:28px;pointer-events:none;
+  transform-origin:50% 0%;
+  transition-property:transform,opacity;
+  transition-duration:560ms,380ms;
+  transition-timing-function:cubic-bezier(.76,0,.24,1),ease-out;
+}
+.preloader-brand{
+  font-family:var(--font-display);font-size:clamp(1.4rem,3vw,2rem);
+  font-weight:700;letter-spacing:-.03em;color:var(--ink);
+}
+.preloader-bar{
+  width:min(220px,62vw);height:2px;border-radius:99px;
+  background:rgba(var(--ink-rgb),.12);overflow:hidden;
+}
+.preloader-bar-fill{
+  display:block;height:100%;width:100%;
+  transform-origin:0 50%;transform:scaleX(0);
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  box-shadow:0 0 12px rgba(var(--accent-rgb),.65);
+}
+.preloader-meta{
+  display:flex;align-items:center;gap:14px;
+  font-family:var(--font-mono);font-size:11.5px;font-weight:600;
+  letter-spacing:.14em;color:var(--ink-2);
+}
+.preloader-count{font-variant-numeric:tabular-nums;color:var(--accent)}
+.preloader.is-leaving{transform:translateY(-100%);opacity:0}
 
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  .page-curtain,.preloader{display:none}
-  .glow-ring{animation:none}
-  .split-line>span{transform:none!important;transition:none}
+  .page-curtain,.preloader,.scroll-progress{display:none!important}
+  .split-line>span{opacity:1!important;transform:none!important;transition:none!important}
+  .reveal-ready{opacity:1!important;transform:none!important;transition:none!important}
+  .media-reveal .visual,.media-reveal .image{clip-path:none!important}
+  main.page-enter{animation:none!important}
 }

@@ -1,0 +1,25 @@
+# Onur Can Orhan — Portfolio & 3D Interactive World
+
+> Personal portfolio and interactive 3D web experience of Onur Can Orhan, a Computer Programming student at Akdeniz University (Antalya, Türkiye).
+
+## Overview
+- **Owner:** Onur Can Orhan (Akdeniz Üniversitesi, Antalya, Türkiye)
+- **Live Site:** https://onurcanorhan.pages.dev/
+- **GitHub:** https://github.com/sushikiddo
+- **Languages:** Turkish (TR) and English (EN)
+
+## Primary Surfaces
+- **3D Interactive World:** https://onurcanorhan.pages.dev/ (Three.js r187 WebGPU + Rapier3D physics)
+- **Classic Home (TR):** https://onurcanorhan.pages.dev/anasayfa.html
+- **Classic Home (EN):** https://onurcanorhan.pages.dev/en/index.html
+- **About (TR / EN):** https://onurcanorhan.pages.dev/hakkimda.html | https://onurcanorhan.pages.dev/en/about.html
+- **Projects (TR / EN):** https://onurcanorhan.pages.dev/projeler.html | https://onurcanorhan.pages.dev/en/projects.html
+- **Blog (TR / EN):** https://onurcanorhan.pages.dev/blog.html | https://onurcanorhan.pages.dev/en/blog.html
+- **Gallery (TR / EN):** https://onurcanorhan.pages.dev/galeri.html | https://onurcanorhan.pages.dev/en/gallery.html
+- **Contact (TR / EN):** https://onurcanorhan.pages.dev/iletisim.html | https://onurcanorhan.pages.dev/en/contact.html
+
+## Featured Projects
+- **Kömür (v2.3):** https://onurcanorhan.pages.dev/komur.html — Desktop cat assistant built with Python, Tkinter, SQLite, Ollama (local AI), spring physics, and stereo audio.
+- **Space Survivor:** https://onurcanorhan.pages.dev/oyun/index.html — Browser-based HTML5 Canvas & JavaScript space survival game.
+- **Multistream Viewer:** https://github.com/sushikiddo/multistream-viewer — Electron desktop app for watching up to 16 Twitch, Kick, and YouTube streams side by side.
+- **This Portfolio:** Bilingual (TR/EN) responsive static + Cloudflare Pages D1 site paired with a WebGPU 3D world.
