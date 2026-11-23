@@ -119,7 +119,7 @@ var PREV_SITE_DEFAULTS = {"fields":{"hero-subtitle-tr":"Akdeniz Üniversitesi'nd
 // Bump SITE_VERSION whenever CURRENT_SITE_PAGES changes. Stored pages are rebuilt from the new
 // defaults; a field or image is carried over only when the owner changed it in the panel, i.e. it
 // differs from PREV_SITE_DEFAULTS (the defaults of the version being replaced). Uploaded media always wins.
-var SITE_VERSION = "human-20261122-v5";
+var SITE_VERSION = "modern-20261123-v6";
 function ownerEdited(value, previousDefault) {
   return previousDefault === void 0 || value !== previousDefault;
 }
