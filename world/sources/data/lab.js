@@ -30,9 +30,9 @@ export default [
         imageMini: 'komur-mini.jpg'
     },
     {
-        title: 'Space Survivor',
-        url: '/oyun/index.html',
-        image: 'space-survivor.jpg',
-        imageMini: 'space-survivor-mini.jpg'
+        title: 'Grafik Animasyon 1',
+        url: '/grafik-animasyon.html',
+        image: 'graphic-animation.jpg',
+        imageMini: 'graphic-animation-mini.jpg'
     }
 ]

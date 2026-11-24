@@ -15,18 +15,18 @@ export default [
         ]
     },
     {
-        title: 'Space Survivor',
-        titleSmall: [ 'Space', 'Survivor' ],
-        url: '/oyun/index.html',
+        title: 'Grafik Animasyon 1',
+        titleSmall: [ 'Grafik', 'Animasyon' ],
+        url: '/grafik-animasyon.html',
         attributes:
         {
             role: 'Geliştirici',
-            with: [ 'JavaScript', 'Canvas' ]
+            with: [ 'Photoshop', 'Grafik Tasarım' ]
         },
         distinctions: [],
         images:
         [
-            'space-survivor.jpg',
+            'graphic-animation.jpg',
         ]
     },
     {
