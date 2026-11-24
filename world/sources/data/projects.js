@@ -15,20 +15,118 @@ export default [
         ]
     },
     {
-        title: 'Grafik Animasyon 1',
-        titleSmall: [ 'Grafik', 'Animasyon' ],
-        url: '/grafik-animasyon.html',
-        attributes:
-        {
-            role: 'Geliştirici',
-            with: [ 'Photoshop', 'Grafik Tasarım' ]
-        },
-        distinctions: [],
-        images:
-        [
-            'graphic-animation.jpg',
+    "title": "Kırmızı Bisiklet",
+    "titleSmall": [
+        "Kırmızı Bisiklet"
+    ],
+    "url": "/kirmizi-bisiklet.html",
+    "attributes": {
+        "role": "Tasarım",
+        "with": [
+            "Photoshop",
+            "Fotoğraf Düzenleme"
         ]
     },
+    "distinctions": [],
+    "images": [
+        "/assets/img/grafik-animasyon/p1-sonrasi.webp"
+    ]
+},
+    {
+    "title": "NOVA AUDIO — Ürün Afişi",
+    "titleSmall": [
+        "NOVA AUDIO",
+        "Ürün Afişi"
+    ],
+    "url": "/nova-audio.html",
+    "attributes": {
+        "role": "Tasarım",
+        "with": [
+            "Photoshop",
+            "Grafik Tasarım"
+        ]
+    },
+    "distinctions": [],
+    "images": [
+        "/assets/img/grafik-animasyon/p2-sonrasi.webp"
+    ]
+},
+    {
+    "title": "Batman — Dijital Renklendirme",
+    "titleSmall": [
+        "Batman",
+        "Dijital Renklendirme"
+    ],
+    "url": "/batman-renklendirme.html",
+    "attributes": {
+        "role": "Tasarım",
+        "with": [
+            "Photoshop",
+            "Dijital Renklendirme"
+        ]
+    },
+    "distinctions": [],
+    "images": [
+        "/assets/img/grafik-animasyon/p3-sonrasi.webp"
+    ]
+},
+    {
+    "title": "Kapadokya — Balon Kompozisyonu",
+    "titleSmall": [
+        "Kapadokya",
+        "Balon Kompozisyonu"
+    ],
+    "url": "/kapadokya-balonlar.html",
+    "attributes": {
+        "role": "Tasarım",
+        "with": [
+            "Photoshop",
+            "Fotoğraf Kompozisyonu"
+        ]
+    },
+    "distinctions": [],
+    "images": [
+        "/assets/img/grafik-animasyon/p4-sonrasi.webp"
+    ]
+},
+    {
+    "title": "Antalya Sahili — Görüntü Temizleme",
+    "titleSmall": [
+        "Antalya Sahili",
+        "Görüntü Temizleme"
+    ],
+    "url": "/antalya-sahili.html",
+    "attributes": {
+        "role": "Tasarım",
+        "with": [
+            "Photoshop",
+            "Fotoğraf Düzenleme"
+        ]
+    },
+    "distinctions": [],
+    "images": [
+        "/assets/img/grafik-animasyon/p5-sonrasi.webp"
+    ]
+},
+    {
+    "title": "Pera Müzesi — Arayüz Tasarımı",
+    "titleSmall": [
+        "Pera Müzesi",
+        "Arayüz Tasarımı"
+    ],
+    "url": "/pera-muzesi.html",
+    "attributes": {
+        "role": "Tasarım",
+        "with": [
+            "Photoshop",
+            "Arayüz Tasarımı"
+        ]
+    },
+    "distinctions": [],
+    "images": [
+        "/assets/img/grafik-animasyon/p6-sonrasi.webp"
+    ]
+},
     {
         title: 'Multistream Viewer',
         titleSmall: [ 'Multistream', 'Viewer' ],

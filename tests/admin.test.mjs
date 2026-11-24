@@ -15,7 +15,7 @@ const auth={'Cookie':'session='+'a'.repeat(64)};
 test('public site includes Komur and current design without mutating stored pages',async()=>{const s=setup();const r=await worker.fetch(req('/anasayfa.html'),s.env);assert.equal(r.status,200);const t=await r.text();assert.match(t,/Kömür/);assert.match(t,/og:site_name/);assert.equal(s.get().siteVersion,undefined)});
 test('admin data requires a session',async()=>{const s=setup();const r=await worker.fetch(req('/api/data'),s.env);assert.equal(r.status,401)});
 test('authenticated model includes editable Komur fields and old content',async()=>{const s=setup();const r=await worker.fetch(req('/api/data',{headers:auth}),s.env);assert.equal(r.status,200);const d=await r.json();assert.equal(d.fields['project-4-title-tr'],'Kömür');assert.ok(d.fields['project-4-p1-tr']);assert.ok(d.fields['bio-tr']);assert.ok(d.projects.some(p=>p.id===4&&p.title_tr==='Kömür'))});
-test('save keeps legacy pages and updates public Komur page',async()=>{const s=setup();const r=await worker.fetch(req('/api/save',{method:'POST',headers:{...auth,Origin:'https://example.pages.dev','Content-Type':'application/json'},body:JSON.stringify({fields:{'project-4-p1-tr':'Yeni <güvenli> açıklama'}})}),s.env);assert.equal(r.status,200);assert.deepEqual(s.get().legacyPagesBefore20261117,pages);assert.equal(s.get().siteVersion,'graphic-animation-20261124-v1');const page=await worker.fetch(req('/komur'),s.env);assert.equal(page.status,200);assert.match(await page.text(),/Yeni &lt;güvenli&gt; açıklama/)});
+test('save keeps legacy pages and updates public Komur page',async()=>{const s=setup();const r=await worker.fetch(req('/api/save',{method:'POST',headers:{...auth,Origin:'https://example.pages.dev','Content-Type':'application/json'},body:JSON.stringify({fields:{'project-4-p1-tr':'Yeni <güvenli> açıklama'}})}),s.env);assert.equal(r.status,200);assert.deepEqual(s.get().legacyPagesBefore20261117,pages);assert.equal(s.get().siteVersion,'personal-design-projects-20261124-v2');const page=await worker.fetch(req('/komur'),s.env);assert.equal(page.status,200);assert.match(await page.text(),/Yeni &lt;güvenli&gt; açıklama/)});
 test('cross-origin writes remain denied',async()=>{const s=setup();const r=await worker.fetch(req('/api/save',{method:'POST',headers:{...auth,Origin:'https://other.invalid'},body:'{}'}),s.env);assert.equal(r.status,403)});
 test('revision conflict does not overwrite content',async()=>{const s=setup();s.setConflict();const before=s.get();const r=await worker.fetch(req('/api/save',{method:'POST',headers:{...auth,Origin:'https://example.pages.dev'},body:JSON.stringify({fields:{'project-4-title-tr':'Kömür yeni'}})}),s.env);assert.equal(r.status,409);assert.deepEqual(s.get(),before)});
 test('private admin stays protected and logout script is private',async()=>{const s=setup();for(const p of ['/admin/','/admin/session.js']){const r=await worker.fetch(req(p),s.env);assert.ok([303,404].includes(r.status))}});
@@ -43,7 +43,7 @@ test('version migration does not resurrect projects deleted in the panel',async(
  // Explicit record: id 3 was deleted.
  let s=setup({pages:build([1,2]),fields:{},siteVersion:'komur-20261117-v1',deletedProjects:[3]});
  let t=await (await worker.fetch(req('/projeler.html'),s.env)).text();
- assert.ok(t.includes('data-project-id="5"')&&t.includes('data-project-id="2"'));
+ assert.ok(t.includes('data-project-id="6"')&&t.includes('data-project-id="2"'));
  assert.ok(!t.includes('data-project-id="1"'),'Space is replaced by the homework');
  assert.ok(!t.includes('data-project-id="3"'),'recorded deletion stays deleted');
  // Old state without the record: a gap among the stored ids (2) means it was deleted.
@@ -121,18 +121,46 @@ test('contact inbox and admin moderation require auth and persist cleanly',async
  assert.equal((await delRes.json()).messages.length,0);
 });
 
-test('homework replaces Space while Komur and owner edits survive migration',async()=>{
- const initial=Object.fromEntries(paths.map(path=>[path,'<!doctype html><html><p data-field="project-1-title-tr">Space Survivor custom title</p><p data-field="bio-tr">Owner biography</p><img data-image="project-1" src="media/old-space.png"/><div><!-- PROJECTS:START --><!-- PROJECTS:END --></div></html>']));
- const s=setup({pages:initial,siteVersion:'human-20261122-v4'});
- for(const path of ['/projeler.html','/en/projects.html']){
+const visualRoutes=['kirmizi-bisiklet.html','nova-audio.html','batman-renklendirme.html','kapadokya-balonlar.html','antalya-sahili.html','pera-muzesi.html'];
+const visualEnglish=['selective-colour.html','nova-audio.html','batman-colourisation.html','cappadocia-balloons.html','antalya-coast.html','pera-museum.html'];
+test('six independent personal projects migrate from the aggregate and preserve owner content',async()=>{
+ const initial=Object.fromEntries(paths.map(path=>[path,'<!doctype html><html><p data-field="bio-tr">Owner biography</p><article data-project-id="4"><h3 data-field="project-4-title-tr">Kömür</h3><p data-field="project-4-desc-tr">Owner description</p></article><article data-project-id="5"><h3 data-field="project-5-title-tr">Grafik Animasyon 1 — Vize Çalışmaları</h3></article> <!-- PROJECTS:START --><!-- PROJECTS:END --></html>']));
+ const s=setup({pages:initial,siteVersion:'graphic-animation-20261124-v1',deletedProjects:[1,2,3]});
+ for(const path of ['/projeler.html','/en/projects.html','/anasayfa.html','/en/index.html']){
   const r=await worker.fetch(req(path),s.env);assert.equal(r.status,200);const t=await r.text();
-  assert.match(t,/data-project-id="5"/);assert.match(t,/data-project-id="4"/);
-  assert.doesNotMatch(t,/Space Survivor|media\/old-space|href="(?:\.\.\/)?oyun\/index.html"/);
+  const ids=[...t.matchAll(/data-project-id="(\d+)"/g)].map(m=>Number(m[1]));
+  assert.deepEqual(ids,[4,6,7,8,9,10,11]);
+  assert.doesNotMatch(t,/Space Survivor|Vize|Midterm|ödev|homework|assignment/i);
  }
- for(const path of ['/grafik-animasyon.html','/en/graphic-animation.html']){
-  const r=await worker.fetch(req(path),s.env);assert.equal(r.status,200);const t=await r.text();
-  for(let n=1;n<=6;n++)assert.ok(t.includes('id="calisma-'+n+'"'));
-  assert.match(t,/hQuNqDB1BqI/);assert.doesNotMatch(t,/\.docx|0542/);
+ for(let i=0;i<6;i++)for(const path of ['/'+visualRoutes[i],'/en/'+visualEnglish[i]]){
+  const r=await worker.fetch(req(path),s.env);assert.equal(r.status,200,path);const t=await r.text();
+  assert.match(t,new RegExp('data-field="project-'+(i+6)+'-title-'));
+  assert.match(t,new RegExp('p'+(i+1)+'-(?:sonrasi|oncesi|taslak)\\.webp'));
+  assert.match(t,/hQuNqDB1BqI/);
+  assert.doesNotMatch(t,/vize|midterm|ödev|homework|assignment|educational|eğitim amaçlı|20261121801|0541|\.docx/i);
  }
+ const model=await(await worker.fetch(req('/api/data',{headers:auth}),s.env)).json();
+ assert.deepEqual(model.projects.map(p=>p.id),[4,6,7,8,9,10,11]);
+ assert.equal(model.fields['project-4-desc-tr'],'Owner description');
  const about=await(await worker.fetch(req('/hakkimda.html'),s.env)).text();assert.match(about,/Owner biography/);
+ const saved=await worker.fetch(req('/api/save',{method:'POST',headers:{...auth,Origin:'https://example.pages.dev','Content-Type':'application/json'},body:JSON.stringify({fields:{'project-7-p1-tr':'My revised poster process'}})}),s.env);
+ assert.equal(saved.status,200);
+ const poster=await(await worker.fetch(req('/nova-audio.html'),s.env)).text();assert.match(poster,/My revised poster process/);
+ const live=await(await worker.fetch(req('/api/world-projects'),s.env)).json();
+ for(let i=0;i<6;i++)assert.equal(live.projects.find(p=>p.id===i+6).url,'/'+visualRoutes[i]);
+ for(const [old,target] of [['/grafik-animasyon.html','/projeler.html'],['/en/graphic-animation.html','/en/projects.html']]){
+  const r=await worker.fetch(req(old),s.env);assert.equal(r.status,301);assert.equal(r.headers.get('location'),target);
+ }
+});
+
+test('introducing six designs preserves colliding custom projects and deleted identities',async()=>{
+ const card='<article data-project-id="6"><h3 data-field="project-6-title-tr">Owner custom project</h3><p data-field="project-6-desc-tr">Owner custom description</p><img data-image="project-6" src="media/owner.png"/><a class="project-open" href="https://example.com/owner">Open</a></article>';
+ const old=Object.fromEntries(paths.map(p=>[p,'<!doctype html><html><!-- PROJECTS:START -->'+(['index.html','projeler.html','en/index.html','en/projects.html'].includes(p)?card:'')+'<!-- PROJECTS:END --></html>']));
+ const s=setup({pages:old,siteVersion:'graphic-animation-20261124-v1',deletedProjects:[1,2,3,7]});
+ const api=await(await worker.fetch(req('/api/world-projects'),s.env)).json();
+ assert.ok(api.projects,JSON.stringify(api));
+ assert.ok(api.projects.some(p=>p.id===7&&p.url==='/nova-audio.html'),'a deleted legacy id does not hide a new design');
+ const custom=api.projects.find(p=>p.title_tr==='Owner custom project');assert.ok(custom);assert.ok(custom.id>11);assert.equal(custom.url,'https://example.com/owner');assert.equal(custom.image,'/media/owner.png');
+ const red=api.projects.find(p=>p.id===6);assert.equal(red.title_tr,'Kırmızı Bisiklet');assert.equal(red.image,'/assets/img/grafik-animasyon/p1-sonrasi.webp');
+ assert.equal(s.get().pages['projeler.html'],old['projeler.html'],'read migration never writes stored state');
 });
