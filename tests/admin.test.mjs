@@ -173,3 +173,10 @@ test('root opens Anasayfa and the 3D world stays available at /3d',async()=>{
  const about=await (await worker.fetch(req('/hakkimda.html'),s.env)).text();
  assert.match(about,/class="world-link" href="\/3d"/);assert.ok(!about.includes('class="world-link" href="/"'));
 });
+
+test('Kömür helper cat is added once to every public page',async()=>{
+ const s=setup();
+ for(const p of ['/anasayfa.html','/hakkimda.html','/en/projects.html']){const t=await (await worker.fetch(req(p),s.env)).text();assert.equal(t.split('komur-pet.js').length-1,1,p)}
+ assert.ok(!JSON.stringify(s.get()).includes('komur-pet.js'),'stored pages stay untouched');
+ for(const a of ['/assets/js/komur-pet.js','/assets/komur/frames.json','/assets/komur/meow.mp3'])assert.equal(await (await worker.fetch(req(a),s.env)).text(),'asset',a);
+});

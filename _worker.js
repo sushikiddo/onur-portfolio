@@ -393,6 +393,13 @@ async function notFoundPage(env, request) {
   return new Response("Not found", { status: 404, headers: plain });
 }
 __name(notFoundPage, "notFoundPage");
+// Kömür, the helper cat, walks on every public page (stored pages are left untouched).
+var KOMUR_PET_TAG = '<script defer src="/assets/js/komur-pet.js?v=241"></script>';
+function withKomurPet(html) {
+  if (html.includes("komur-pet.js")) return html;
+  const i = html.lastIndexOf("</body>");
+  return i < 0 ? html + KOMUR_PET_TAG : html.slice(0, i) + KOMUR_PET_TAG + html.slice(i);
+}
 async function servePage(request, env) {
   try {
     const requested = new URL(request.url).pathname.replace(/^\/+/, "") || "anasayfa.html";
@@ -404,7 +411,7 @@ async function servePage(request, env) {
     }
     if (!PAGE_PATHS.includes(path)) return notFoundPage(env, request);
     const { value } = await readState(env);
-    return response(value.pages[path].replaceAll('class="world-link" href="/"', 'class="world-link" href="/3d"'), 200, PAGE_HEADERS);
+    return response(withKomurPet(value.pages[path].replaceAll('class="world-link" href="/"', 'class="world-link" href="/3d"')), 200, PAGE_HEADERS);
   } catch (err2) {
     const status = Number(err2?.status) || 500;
     return response(status < 500 ? String(err2?.message || "Not found") : "Unable to serve page", status, { "content-type": "text/plain; charset=utf-8", "x-content-type-options": "nosniff" });
@@ -862,6 +869,7 @@ var WORLD_DIRS = "achievements|areas|basis|behindTheScene|benches|birchTrees|bla
 var WORLD_RE = new RegExp("^/(?:(?:" + WORLD_DIRS + ")/.+|palette\\.(?:ktx|png))$");
 function publicAsset(path) {
   if (publicFiles.has(path)) return true;
+  if (path === "/assets/komur/frames.json") return true; // Kömür helper cat animation frames
   if (/^\/(assets|images|oyun)\//.test(path) && /\.(?:css|js|png|jpe?g|gif|webp|svg|ico|woff2?|ttf|eot|mp3|mp4|webm|pdf|wasm)$/i.test(path)) return true;
   return WORLD_RE.test(path) && /\.(?:png|jpe?g|webp|svg|ico|ktx|glb|bin|mp3|js|wasm|woff2?|ttf|eot|json|webmanifest)$/i.test(path);
 }
