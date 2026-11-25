@@ -19,7 +19,7 @@
 - **Contact (TR / EN):** https://onurcanorhan.pages.dev/iletisim.html | https://onurcanorhan.pages.dev/en/contact.html
 
 ## Featured Projects
-- **Kömür (v2.3.0 — macOS & Windows):** https://onurcanorhan.pages.dev/komur.html — Lifelike desktop cat for macOS (Apple Silicon) and Windows x64 built with Python, Tkinter, procedural feline locomotion, desktop toys, window perching, real cat audio, and SQLite.
+- **Kömür (v2.4.0 — macOS & Windows):** https://onurcanorhan.pages.dev/komur.html — Lifelike desktop cat for macOS (Apple Silicon DMG/ZIP) and Windows x64 built with Python, Tkinter, non-activating panels, MacBook Notch Peek, 4-slot wardrobe, battery-saver FPS, desktop toys, real cat audio, and SQLite.
 - **The Red Bicycle:** https://onurcanorhan.pages.dev/kirmizi-bisiklet.html — A photo edit that brings the bicycle and sunflowers into focus through selective colour on a monochrome street.
 - **NOVA AUDIO — Product Poster:** https://onurcanorhan.pages.dev/nova-audio.html — A product poster combining red headphones with typography, reflection and light on a dark background.
 - **Batman — Digital Colourisation:** https://onurcanorhan.pages.dev/batman-renklendirme.html — A Batman pencil drawing coloured with separate layers and light and shadow while preserving its linework.
