@@ -394,7 +394,7 @@ async function notFoundPage(env, request) {
 }
 __name(notFoundPage, "notFoundPage");
 // Kömür, the helper cat, walks on every public page (stored pages are left untouched).
-var KOMUR_PET_TAG = '<script defer src="/assets/js/komur-pet.js?v=241"></script>';
+var KOMUR_PET_TAG = '<script defer src="/assets/js/komur-pet.js?v=242"></script>';
 function withKomurPet(html) {
   if (html.includes("komur-pet.js")) return html;
   const i = html.lastIndexOf("</body>");

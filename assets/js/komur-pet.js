@@ -158,7 +158,7 @@
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
   }
 
-  /* ---------- sounds (only after a click) ---------- */
+  /* ---------- sound (only from the Miyav! menu button) ---------- */
   var sounds = {};
   function play(name) {
     try {
@@ -279,11 +279,10 @@
   var clicks = 0;
   btn.addEventListener('click', function () {
     lastInteract = performance.now();
-    if (state === 'sleep') { play('trill'); setState('stretch', 2.5); say(EN ? 'Mrrp? I’m awake!' : 'Mrrp? Uyandım!', 2500); return; }
+    if (state === 'sleep') { setState('stretch', 2.5); say(EN ? 'Mrrp? I’m awake!' : 'Mrrp? Uyandım!', 2500); return; }
     if (menuOpen) { hideBubble(); return; }
     target = null;
-    if (++clicks % 4 === 0) { play('purr'); setState('sit', 4); say(pick(T.petted), 2500); return; }
-    play(clicks === 1 ? 'meow' : 'trill');
+    if (++clicks % 4 === 0) { setState('sit', 4); say(pick(T.petted), 2500); return; }
     setState('sit', 8);
     openMenu();
   });
