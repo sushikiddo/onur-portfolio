@@ -394,7 +394,7 @@ async function notFoundPage(env, request) {
 }
 __name(notFoundPage, "notFoundPage");
 // Kömür, the helper cat, walks on every public page (stored pages are left untouched).
-var KOMUR_PET_TAG = '<script defer src="/assets/js/komur-pet.js?v=242"></script>';
+var KOMUR_PET_TAG = '<script defer src="/assets/js/komur-pet.js?v=243"></script>';
 function withKomurPet(html) {
   if (html.includes("komur-pet.js")) return html;
   const i = html.lastIndexOf("</body>");
@@ -869,7 +869,6 @@ var WORLD_DIRS = "achievements|areas|basis|behindTheScene|benches|birchTrees|bla
 var WORLD_RE = new RegExp("^/(?:(?:" + WORLD_DIRS + ")/.+|palette\\.(?:ktx|png))$");
 function publicAsset(path) {
   if (publicFiles.has(path)) return true;
-  if (path === "/assets/komur/frames.json") return true; // Kömür helper cat animation frames
   if (/^\/(assets|images|oyun)\//.test(path) && /\.(?:css|js|png|jpe?g|gif|webp|svg|ico|woff2?|ttf|eot|mp3|mp4|webm|pdf|wasm)$/i.test(path)) return true;
   return WORLD_RE.test(path) && /\.(?:png|jpe?g|webp|svg|ico|ktx|glb|bin|mp3|js|wasm|woff2?|ttf|eot|json|webmanifest)$/i.test(path);
 }

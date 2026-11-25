@@ -1,5 +1,5 @@
 /* Kömür — sitede gezen yardımcı kedi.
-   Çizimler Kömür 2.4.0'ın kendi CatRenderer'ından üretildi (assets/komur/frames.json). */
+   Çizimler Kömür 2.4.0'ın kendi CatRenderer'ından üretildi (assets/komur/frames.js). */
 (function () {
   'use strict';
   if (window.__komurPet || window.self !== window.top) return; // admin önizlemesi (iframe) içinde açılmaz
@@ -353,7 +353,15 @@
     back.style.display = 'none';
     measure();
     addEventListener('resize', measure);
-    fetch(new URL('frames.json?v=240', base).href).then(function (r) { return r.json(); }).then(function (d) {
+    // frames ship as a script so the pet also works from file:// (offline copy of the site)
+    new Promise(function (ok, fail) {
+      if (window.KOMUR_FRAMES) return ok(window.KOMUR_FRAMES);
+      var s = document.createElement('script');
+      s.src = new URL('frames.js?v=242', base).href;
+      s.onload = function () { window.KOMUR_FRAMES ? ok(window.KOMUR_FRAMES) : fail(); };
+      s.onerror = fail;
+      document.head.appendChild(s);
+    }).then(function (d) {
       data = d;
       ['wander', 'sit'].forEach(frames);
       if (store.get('komur-pet-hidden') === '1') { setHidden(true); return; }
