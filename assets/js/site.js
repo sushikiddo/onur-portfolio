@@ -159,8 +159,7 @@
   const names = en ? ['Home', 'About', 'Projects', 'Journal', 'Gallery', 'Contact'] : ['Anasayfa', 'Hakkımda', 'Projeler', 'Blog', 'Galeri', 'İletişim'];
   const files = en ? ['en/index.html', 'en/about.html', 'en/projects.html', 'en/blog.html', 'en/gallery.html', 'en/contact.html'] : ['anasayfa.html', 'hakkimda.html', 'projeler.html', 'blog.html', 'galeri.html', 'iletisim.html'];
   const entries = names.map((name, i) => ({ name, file: files[i], hint: String(i + 1).padStart(2, '0') }));
-  entries.push({ name: en ? 'Play Space Survivor' : 'Space Survivor oyna', file: 'oyun/index.html', hint: en ? 'GAME' : 'OYUN' });
-  entries.push({ name: en ? '3D world' : '3D dünya', file: '/', hint: '3D' });
+  entries.push({ name: en ? '3D world' : '3D dünya', file: '/3d', hint: '3D' });
   let selected = 0, opener;
   const results = dialog.querySelector('.command-results');
   function select(index) {

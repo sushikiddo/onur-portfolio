@@ -18,3 +18,13 @@ JetBrains Mono — JetBrains · SIL Open Font License 1.1 (assets/fonts altında
 EKLENENLER
 404.html: Cloudflare Pages'in bulunamayan adresler için otomatik gösterdiği özel hata sayfası.
 images/og-card.jpg: Bağlantı paylaşıldığında (WhatsApp, LinkedIn vb.) görünen önizleme görseli; site tasarımından üretilmiştir.
+
+GALERİ FOTOĞRAFLARI
+Kendi fotoğrafım ve kedim Kömür'ün fotoğrafları bana aittir.
+Antalya fotoğrafları Wikimedia Commons'tan alınmış, siteye uygun olarak kırpılıp küçültülmüştür (WebP):
+- Kaleiçi Yat Limanı: REHBER0770 · CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0) · https://commons.wikimedia.org/wiki/File:Antalya_kalei%C3%A7i_2.jpg
+- Düden Şelalesi: Bestalex · CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0) · https://commons.wikimedia.org/wiki/File:Antalya._Lower_D%C3%BCden_Waterfall.jpg
+- Yivli Minare: Julia Maudlin · CC BY 2.0 (https://creativecommons.org/licenses/by/2.0) · https://commons.wikimedia.org/wiki/File:800-Year-Old_Yivli_Minaret_and_Taurus_Mountains,_Antalya,_Turkey.jpg
+- Hadrian Kapısı: Bernard Gagnon · CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0) · https://commons.wikimedia.org/wiki/File:Hadrian%27s_Gate,_Antalya_01.jpg
+- Konyaaltı ve Beydağları: FingerWiki · CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0) · https://commons.wikimedia.org/wiki/File:View_of_Konyaalt%C4%B1_Beach_and_Beyda%C4%9Flar%C4%B1_Mountains,_Antalya.jpg
+- Kurşunlu Şelalesi: Burak Küçükarslan · CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0) · https://commons.wikimedia.org/wiki/File:Kursunlu_Waterfall_1.jpg

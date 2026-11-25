@@ -17,7 +17,7 @@ Site iki parçadan oluşuyor:
 |---|---|
 | Anasayfa | Kısa tanıtım, öne çıkan projeler, galeriden örnekler, son yazılar |
 | Hakkımda | Vesikalık fotoğraf, özgeçmiş, ders programı, ilgi alanları ve yüzdeli yetenekler |
-| Projeler | Kömür (masaüstü kedi asistanı), Space Survivor (tarayıcı oyunu), Multistream Viewer ve bu site |
+| Projeler | Kömür (masaüstü kedi asistanı), Multistream Viewer ve bu site |
 | Blog | HTML5, CSS3 ile responsive tasarım ve yazılımda yapay zekâ üzerine üç yazı |
 | Galeri | Kendi fotoğraflarım ve projelerimden ekran görüntüleri |
 | İletişim | Adres, telefon ve iletişim formu (form e-posta uygulamanı açar, site bilgi saklamaz) |

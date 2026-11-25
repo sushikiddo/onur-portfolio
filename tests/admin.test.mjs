@@ -15,7 +15,7 @@ const auth={'Cookie':'session='+'a'.repeat(64)};
 test('public site includes Komur and current design without mutating stored pages',async()=>{const s=setup();const r=await worker.fetch(req('/anasayfa.html'),s.env);assert.equal(r.status,200);const t=await r.text();assert.match(t,/Kömür/);assert.match(t,/og:site_name/);assert.equal(s.get().siteVersion,undefined)});
 test('admin data requires a session',async()=>{const s=setup();const r=await worker.fetch(req('/api/data'),s.env);assert.equal(r.status,401)});
 test('authenticated model includes editable Komur fields and old content',async()=>{const s=setup();const r=await worker.fetch(req('/api/data',{headers:auth}),s.env);assert.equal(r.status,200);const d=await r.json();assert.equal(d.fields['project-4-title-tr'],'Kömür');assert.ok(d.fields['project-4-p1-tr']);assert.ok(d.fields['bio-tr']);assert.ok(d.projects.some(p=>p.id===4&&p.title_tr==='Kömür'))});
-test('save keeps legacy pages and updates public Komur page',async()=>{const s=setup();const r=await worker.fetch(req('/api/save',{method:'POST',headers:{...auth,Origin:'https://example.pages.dev','Content-Type':'application/json'},body:JSON.stringify({fields:{'project-4-p1-tr':'Yeni <güvenli> açıklama'}})}),s.env);assert.equal(r.status,200);assert.deepEqual(s.get().legacyPagesBefore20261117,pages);assert.equal(s.get().siteVersion,'no-admin-footer-20261125-v12');const page=await worker.fetch(req('/komur'),s.env);assert.equal(page.status,200);assert.match(await page.text(),/Yeni &lt;güvenli&gt; açıklama/)});
+test('save keeps legacy pages and updates public Komur page',async()=>{const s=setup();const r=await worker.fetch(req('/api/save',{method:'POST',headers:{...auth,Origin:'https://example.pages.dev','Content-Type':'application/json'},body:JSON.stringify({fields:{'project-4-p1-tr':'Yeni <güvenli> açıklama'}})}),s.env);assert.equal(r.status,200);assert.deepEqual(s.get().legacyPagesBefore20261117,pages);assert.equal(s.get().siteVersion,'life-gallery-20261125-v13');const page=await worker.fetch(req('/komur'),s.env);assert.equal(page.status,200);assert.match(await page.text(),/Yeni &lt;güvenli&gt; açıklama/)});
 test('cross-origin writes remain denied',async()=>{const s=setup();const r=await worker.fetch(req('/api/save',{method:'POST',headers:{...auth,Origin:'https://other.invalid'},body:'{}'}),s.env);assert.equal(r.status,403)});
 test('revision conflict does not overwrite content',async()=>{const s=setup();s.setConflict();const before=s.get();const r=await worker.fetch(req('/api/save',{method:'POST',headers:{...auth,Origin:'https://example.pages.dev'},body:JSON.stringify({fields:{'project-4-title-tr':'Kömür yeni'}})}),s.env);assert.equal(r.status,409);assert.deepEqual(s.get(),before)});
 test('private admin stays protected and logout script is private',async()=>{const s=setup();for(const p of ['/admin/','/admin/session.js']){const r=await worker.fetch(req(p),s.env);assert.ok([303,404].includes(r.status))}});
@@ -179,4 +179,14 @@ test('Kömür helper cat is added once to every public page',async()=>{
  for(const p of ['/anasayfa.html','/hakkimda.html','/en/projects.html']){const t=await (await worker.fetch(req(p),s.env)).text();assert.equal(t.split('komur-pet.js').length-1,1,p)}
  assert.ok(!JSON.stringify(s.get()).includes('komur-pet.js'),'stored pages stay untouched');
  for(const a of ['/assets/js/komur-pet.js','/assets/komur/frames.js','/assets/komur/meow.mp3'])assert.equal(await (await worker.fetch(req(a),s.env)).text(),'asset',a);
+});
+
+test('placeholder gallery in old stored pages gives way to the photo gallery, uploads survive',async()=>{
+ const card=(n,src,t)=>'<article class="card"><img data-image="gallery-'+n+'" src="'+src+'"/><h3 data-field="gallery-'+n+'-title-tr">'+t+'</h3></article>';
+ const old=Object.fromEntries(paths.map(p=>[p,'<!doctype html><html>'+card(1,'assets/img/gallery-1.svg','Çizim · eskiz defteri')+card(2,'media/abc.png','Yüklediğim')+'</html>']));
+ const s=setup({pages:old,fields:{},siteVersion:'human-20261122-v5'});
+ const t=await (await worker.fetch(req('/galeri.html'),s.env)).text();
+ assert.doesNotMatch(t,/eskiz defteri|gallery-1\.svg|Space Survivor/);
+ assert.match(t,/assets\/img\/galeri\/kaleici\.webp/);
+ assert.match(t,/data-image="gallery-2"[^>]*src="media\/abc\.png"|src="media\/abc\.png"[^>]*data-image="gallery-2"/,'uploaded gallery image kept');
 });
