@@ -404,7 +404,7 @@ async function servePage(request, env) {
     }
     if (!PAGE_PATHS.includes(path)) return notFoundPage(env, request);
     const { value } = await readState(env);
-    return response(value.pages[path], 200, PAGE_HEADERS);
+    return response(value.pages[path].replaceAll('class="world-link" href="/"', 'class="world-link" href="/3d"'), 200, PAGE_HEADERS);
   } catch (err2) {
     const status = Number(err2?.status) || 500;
     return response(status < 500 ? String(err2?.message || "Not found") : "Unable to serve page", status, { "content-type": "text/plain; charset=utf-8", "x-content-type-options": "nosniff" });
@@ -935,7 +935,9 @@ async function dispatch(request, env) {
     if (path === "/admin/index.html") target.pathname = "/admin/";
     response2 = await env.ASSETS.fetch(new Request(target, request));
   } else if (path.startsWith("/media/")) response2 = await serveMedia(request, env);
-  else if (path === "/" || path === "/index.html") response2 = await env.ASSETS.fetch(request); // "/" belongs to the 3D world; the classic home is /anasayfa.html
+  else if (path === "/" || path === "/index.html") return new Response(null, { status: 302, headers: { Location: "/hakkimda.html", "Cache-Control": "no-store" } }); // site opens on Hakkımda
+  else if (path === "/3d/") return new Response(null, { status: 301, headers: { Location: "/3d" } });
+  else if (path === "/3d") response2 = await env.ASSETS.fetch(new Request(new URL("/", url), request)); // optional 3D world; relative asset paths still resolve to /
   else if (sitePages.has(path)) response2 = await servePage(request, env);
   else if (path === "/404.html") {
     const bytes = await staticRead(env, "/404.html");
