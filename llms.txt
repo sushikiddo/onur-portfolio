@@ -20,11 +20,11 @@
 
 ## Featured Projects
 - **Kömür (v2.4.0 — macOS & Windows):** https://onurcanorhan.pages.dev/komur.html — Lifelike desktop cat for macOS (Apple Silicon DMG/ZIP) and Windows x64 built with Python, Tkinter, non-activating panels, MacBook Notch Peek, 4-slot wardrobe, battery-saver FPS, desktop toys, real cat audio, and SQLite.
-- **The Red Bicycle:** https://onurcanorhan.pages.dev/kirmizi-bisiklet.html — A photo edit that brings the bicycle and sunflowers into focus through selective colour on a monochrome street.
-- **NOVA AUDIO — Product Poster:** https://onurcanorhan.pages.dev/nova-audio.html — A product poster combining red headphones with typography, reflection and light on a dark background.
-- **Batman — Digital Colourisation:** https://onurcanorhan.pages.dev/batman-renklendirme.html — A Batman pencil drawing coloured with separate layers and light and shadow while preserving its linework.
-- **Cappadocia — Balloon Composition:** https://onurcanorhan.pages.dev/kapadokya-balonlar.html — A Cappadocia composition using 12 linked Smart Object instances of one balloon to create depth.
-- **Antalya Coast — Image Cleanup:** https://onurcanorhan.pages.dev/antalya-sahili.html — An Antalya coastal scene cleaned up by combining 25 frames with a Median image stack to remove a moving boat.
-- **Pera Museum — Interface Design:** https://onurcanorhan.pages.dev/pera-muzesi.html — My interface design based on the Pera Museum home page, with three layouts built on a 12-column grid.
+- **History Brush — The Red Bicycle:** https://onurcanorhan.pages.dev/kirmizi-bisiklet.html — A photo edit that brings the bicycle and sunflowers into focus through selective colour on a monochrome street.
+- **Product Promotion — NOVA AUDIO:** https://onurcanorhan.pages.dev/nova-audio.html — A product poster combining red headphones with typography, reflection and light on a dark background.
+- **Pencil Drawing Colourisation — Batman:** https://onurcanorhan.pages.dev/batman-renklendirme.html — A Batman pencil drawing coloured with separate layers and light and shadow while preserving its linework.
+- **Smart Object — Cappadocia Balloons:** https://onurcanorhan.pages.dev/kapadokya-balonlar.html — A Cappadocia composition using 12 linked Smart Object instances of one balloon to create depth.
+- **Image Stack — Antalya Coast:** https://onurcanorhan.pages.dev/antalya-sahili.html — An Antalya coastal scene cleaned up by combining 25 frames with a Median image stack to remove a moving boat.
+- **Web Interface Design — Pera Museum:** https://onurcanorhan.pages.dev/pera-muzesi.html — My interface design based on the Pera Museum home page, with three layouts built on a 12-column grid.
 - **Multistream Viewer:** https://github.com/sushikiddo/multistream-viewer — Electron desktop app for watching up to 16 Twitch, Kick, and YouTube streams side by side.
 - **This Portfolio:** Bilingual (TR/EN) responsive static + Cloudflare Pages D1 site paired with a WebGPU 3D world.
