@@ -165,9 +165,9 @@ test('introducing six designs preserves colliding custom projects and deleted id
  assert.equal(s.get().pages['projeler.html'],old['projeler.html'],'read migration never writes stored state');
 });
 
-test('root opens Hakkimda and the 3D world stays available at /3d',async()=>{
+test('root opens Anasayfa and the 3D world stays available at /3d',async()=>{
  const s=setup();let asked;s.env.ASSETS.fetch=async r=>{asked=new URL(r.url).pathname;return new Response('world')};
- for(const p of ['/','/index.html']){const r=await worker.fetch(req(p),s.env);assert.equal(r.status,302);assert.equal(r.headers.get('location'),'/hakkimda.html')}
+ for(const p of ['/','/index.html']){const r=await worker.fetch(req(p),s.env);assert.equal(r.status,302);assert.equal(r.headers.get('location'),'/anasayfa.html')}
  const w=await worker.fetch(req('/3d'),s.env);assert.equal(w.status,200);assert.equal(await w.text(),'world');assert.equal(asked,'/');
  assert.equal((await worker.fetch(req('/3d/'),s.env)).headers.get('location'),'/3d');
  const about=await (await worker.fetch(req('/hakkimda.html'),s.env)).text();
