@@ -12,7 +12,7 @@ with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
         # Dot folders/files (.git, .wrangler with Cloudflare account data, .gitignore) never ship.
         # world/: only the 3D source goes in (no node_modules or build output).
         if p.is_dir() or rel.parts[0] in skip_dirs or any(part.startswith(".") for part in rel.parts) \
-                or "node_modules" in rel.parts or rel.parts[:2] == ("world", "dist") or p.suffix == ".wav" \
+                or "node_modules" in rel.parts or rel.parts[:2] in {("world", "dist"), ("world", "dist-masa")} or p.suffix == ".wav" \
                 or p.name in skip_files or p.suffix in {".zip", ".PDF"}:
             continue
         if p.suffix == ".html":  # in the delivered ZIP the 3D world link must point to the live site (/ is not the classic home there)
