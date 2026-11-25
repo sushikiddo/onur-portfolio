@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Kömür'ün Masası — Onur Can Orhan</title>
+  <meta name="description" content="Onur Can Orhan'ın gerçekçi 3D interaktif çalışma masası: smokin kedi Kömür ile stüdyo masasında dolaş, projeleri, grafik tasarımları ve yazıları keşfet." />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Kömür'ün Masası — Onur Can Orhan" />
+  <meta property="og:description" content="Onur Can Orhan'ın gerçekçi 3D interaktif çalışma masası: smokin kedi Kömür ile stüdyo masasında dolaş." />
+  <meta property="og:url" content="https://onurcanorhan.pages.dev/3d" />
+  <meta property="og:image" content="https://onurcanorhan.pages.dev/images/og-card.jpg" />
+  <meta name="theme-color" content="#10121c" />
+  <link rel="icon" type="image/svg+xml" href="/images/logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <canvas id="desk-canvas" aria-label="Kömür'ün Masası 3D Portfolyo"></canvas>
+
+  <!-- 3D Projected Station Labels -->
+  <div id="station-labels" class="station-labels" aria-hidden="true"></div>
+
+  <!-- Intro Overlay -->
+  <div id="intro-overlay" class="intro-overlay">
+    <div class="intro-card">
+      <p class="intro-eyebrow" data-i18n="introEyebrow">3D İNTERAKTİF STÜDYO · ANTALYA</p>
+      <h1 data-i18n="introTitle">Kömür'ün Masasına Hoş Geldin</h1>
+      <p class="intro-desc" data-i18n="introDesc">Ben Onur Can Orhan. Smokin kedim Kömür ile geniş çalışma masamda dolaş; kitaplara ve kedi kulesine zıpla, projelerimi, grafik tasarımlarımı ve yazılarımı keşfet.</p>
+      <div class="intro-actions">
+        <button id="btn-start" class="btn-primary" type="button" data-i18n="introStart">🐾 Kömür ile Keşfet</button>
+        <a id="link-intro-classic" class="btn-ghost" href="/anasayfa.html" data-i18n="introClassic">Klasik Siteye Geç</a>
+      </div>
+      <p class="intro-hint" data-i18n="introHint">WASD / Oklar · Shift koş · Space zıpla · C kamera · Sürükle/Zoom · Tıkla-Git</p>
+    </div>
+  </div>
+
+  <!-- Top-Left Status & Active Mini-Game HUD -->
+  <div class="hud-top-left">
+    <div class="status-pill" id="status-pill">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-text">Çevrimdışı</span>
+      <span class="sep">·</span>
+      <span id="lamp-badge">Akşam</span>
+    </div>
+    <div class="laser-hud" id="laser-hud" hidden>
+      <span class="laser-dot-icon"></span>
+      <span data-i18n="laserScore">Skor</span>: <strong id="laser-score">0</strong>
+      <span class="sep">·</span>
+      <span data-i18n="laserTime">Süre</span>: <strong id="laser-time">30</strong>s
+      <button id="btn-laser-stop" class="mini-btn" type="button" data-i18n="laserStop">Bitir</button>
+    </div>
+  </div>
+
+  <!-- Top-Right Circular Controls -->
+  <div class="hud-top-right">
+    <button id="btn-cam" class="icon-btn" type="button" title="Kamera Açısı (C)" aria-label="Kamera Açısı">🎥</button>
+    <button id="btn-lamp" class="icon-btn" type="button" title="Işık Modu (L)" aria-label="Işık Modu">🌇</button>
+    <button id="btn-laser" class="icon-btn" type="button" title="Lazer Avı" aria-label="Lazer Avı">🎯</button>
+    <button id="btn-note" class="icon-btn" type="button" title="Post-it Bırak" aria-label="Post-it Bırak">📝</button>
+    <button id="btn-map" class="icon-btn" type="button" title="Harita (M)" aria-label="Harita">🗺️</button>
+    <button id="btn-reset" class="icon-btn" type="button" title="Sıfırla" aria-label="Sıfırla">↺</button>
+  </div>
+
+  <!-- Bottom-Left Quick Navigation Pill -->
+  <nav class="quick-nav" aria-label="Hızlı gezinme">
+    <a href="/hakkimda.html" data-station="about">Hakkımda</a>
+    <a href="/projeler.html" data-station="projects">Projeler</a>
+    <a href="/komur.html" data-station="komur">Kömür</a>
+    <a href="/blog.html" data-station="blog">Blog</a>
+    <a href="/galeri.html" data-station="gallery">Galeri</a>
+    <a href="/iletisim.html" data-station="contact">İletişim</a>
+    <a id="link-classic-nav" href="/anasayfa.html" data-i18n="classicLink">Klasik Site</a>
+    <button id="btn-lang" class="lang-btn" type="button">EN</button>
+  </nav>
+
+  <!-- Bottom-Right Controls Hint -->
+  <div class="controls-hint" id="controls-hint" data-i18n="controlsHint">WASD · Shift Koş · Space Zıpla · E Aç · C Kamera · Tıkla-Git</div>
+
+  <!-- Mobile Touch Controls -->
+  <div class="touch-controls" id="touch-controls">
+    <div class="dpad">
+      <button class="dpad-btn up" data-dir="up" type="button" aria-label="İleri">▲</button>
+      <button class="dpad-btn left" data-dir="left" type="button" aria-label="Sol">◀</button>
+      <button class="dpad-btn right" data-dir="right" type="button" aria-label="Sağ">▶</button>
+      <button class="dpad-btn down" data-dir="down" type="button" aria-label="Geri">▼</button>
+    </div>
+    <div class="touch-actions">
+      <button id="btn-touch-interact" class="touch-act-btn accent" type="button" hidden data-i18n="interactBtn">Aç</button>
+      <button id="btn-touch-jump" class="touch-act-btn" type="button" data-i18n="jumpBtn">Zıpla</button>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- In-World Page Viewer Modal -->
+  <div id="page-modal" class="modal-backdrop" hidden>
+    <div class="page-modal-box">
+      <div class="page-modal-bar">
+        <strong id="page-modal-title">Onur Can Orhan</strong>
+        <div class="page-modal-actions">
+          <button id="btn-page-theme" class="bar-btn" type="button" aria-label="Tema değiştir">☀️</button>
+          <a id="link-page-external" class="bar-btn" href="/anasayfa.html" data-i18n="fullPage">Tam sayfa ↗</a>
+          <button id="btn-page-close" class="bar-btn close" type="button" aria-label="Kapat">✕</button>
+        </div>
+      </div>
+      <iframe id="page-modal-frame" title="İçerik penceresi"></iframe>
+    </div>
+  </div>
+
+  <!-- Post-it / Whispers Modal -->
+  <div id="note-modal" class="modal-backdrop" hidden>
+    <div class="card-modal">
+      <div class="card-modal-head">
+        <h2 data-i18n="noteModalTitle">Monitöre Post-it Bırak</h2>
+        <button class="bar-btn close" data-close-modal="note-modal" type="button">✕</button>
+      </div>
+      <p class="card-modal-sub" data-i18n="noteModalSub">Bıraktığın not 3D monitörün kenarına yapışır ve tüm ziyaretçilere görünür.</p>
+      <form id="note-form" class="note-form">
+        <input id="note-input" type="text" maxlength="60" required placeholder="Kısa bir not yaz (maks. 60 karakter)..." />
+        <button class="btn-primary" type="submit" data-i18n="noteSend">Yapıştır</button>
+      </form>
+      <h3 class="sub-head" data-i18n="noteListTitle">Son Yapışkan Notlar</h3>
+      <ul id="note-list" class="note-list"></ul>
+    </div>
+  </div>
+
+  <!-- Laser Hunt Leaderboard Modal -->
+  <div id="laser-modal" class="modal-backdrop" hidden>
+    <div class="card-modal">
+      <div class="card-modal-head">
+        <h2 data-i18n="laserDoneTitle">Lazer Avı Bitti!</h2>
+        <button class="bar-btn close" data-close-modal="laser-modal" type="button">✕</button>
+      </div>
+      <p class="card-modal-sub"><span data-i18n="laserDoneSub">30 saniyede yakaladığın lazer sayısı:</span> <strong id="laser-final-score" class="score-big">0</strong></p>
+      <form id="laser-score-form" class="note-form">
+        <input id="laser-tag-input" type="text" maxlength="3" required placeholder="3 harf (örn. ONR)" />
+        <button class="btn-primary" type="submit" data-i18n="laserSubmit">Skoru Kaydet</button>
+      </form>
+      <h3 class="sub-head" data-i18n="laserTop10">Günlük En İyi 10</h3>
+      <ol id="laser-leaderboard" class="leaderboard-list"></ol>
+      <div class="modal-footer-row">
+        <button id="btn-laser-again" class="btn-ghost" type="button" data-i18n="laserAgain">Tekrar Oyna</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expanded L-Desk Map Teleport Modal -->
+  <div id="map-modal" class="modal-backdrop" hidden>
+    <div class="card-modal map-modal-wide">
+      <div class="card-modal-head">
+        <h2 data-i18n="mapModalTitle">Stüdyo Masa Haritası</h2>
+        <button class="bar-btn close" data-close-modal="map-modal" type="button">✕</button>
+      </div>
+      <p class="card-modal-sub" data-i18n="mapModalSub">Kömür'ü ışınlamak için haritada herhangi bir noktaya veya etikete tıkla:</p>
+      <div id="desk-map-board" class="desk-map-board">
+        <div class="desk-map-l-main"></div>
+        <div class="desk-map-l-wing"></div>
+        <div class="desk-map-mat"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
